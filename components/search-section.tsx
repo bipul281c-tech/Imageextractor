@@ -29,7 +29,7 @@ export function SearchSection({
   isQueued = false,
   queuePosition = 0
 }: SearchSectionProps) {
-  const [url, setUrl] = useState("https://unsplash.com/wallpapers")
+  const [url, setUrl] = useState("")
   const [progress, setProgress] = useState(0)
   const [messageIndex, setMessageIndex] = useState(0)
 
