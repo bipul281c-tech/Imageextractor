@@ -106,7 +106,7 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
   const activeFiltersCount = selectedFormats.size + (minWidth > 0 ? 1 : 0)
 
   return (
-    <aside>
+    <aside className="lg:self-start lg:sticky lg:top-24">
       {/* Mobile: Horizontal Filter Bar - Always Visible */}
       <div className="lg:hidden rounded-lg border border-gray-200 bg-white p-3">
         {/* Format Chips */}
@@ -158,7 +158,7 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
       </div>
 
       {/* Desktop: Full Sidebar */}
-      <div className="hidden lg:block sticky top-20 rounded-lg border border-gray-200 bg-white">
+      <div className="hidden lg:block rounded-lg border border-gray-200 bg-white">
         <div className="flex items-center justify-between border-b border-gray-100 p-5 pb-2">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-[#11224E]">Filters</h3>
           <Tooltip>
