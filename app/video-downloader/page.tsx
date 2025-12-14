@@ -102,16 +102,20 @@ export default function VideoDownloaderPage() {
                 </section>
 
                 <section aria-label="Media extraction results">
-                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-                        <FiltersSidebar
-                            images={images}
-                            onFiltersChange={handleFiltersChange}
-                        />
-                        <ImageGrid
-                            images={filteredImages}
-                            loading={loading}
-                            error={error}
-                        />
+                    <div className="grid grid-cols-1 gap-4 lg:gap-8 lg:grid-cols-12 lg:items-start">
+                        <div className="lg:col-span-3 sticky top-14 z-40 bg-[#EEEEEE] py-2 lg:py-4">
+                            <FiltersSidebar
+                                images={images}
+                                onFiltersChange={handleFiltersChange}
+                            />
+                        </div>
+                        <div className="lg:col-span-9">
+                            <ImageGrid
+                                images={filteredImages}
+                                loading={loading}
+                                error={error}
+                            />
+                        </div>
                     </div>
                 </section>
 
