@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback, memo } from "react"
 import { Check, Minus, ChevronDown, Package, ArrowDown, ImageOff, Loader2 } from "lucide-react"
 import JSZip from "jszip"
 import { saveAs } from "file-saver"
@@ -54,23 +54,27 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
     setSelectedImages(new Set(images.filter((img) => img.defaultChecked).map((img) => img.id)))
   }, [images])
 
-  const handleSelectAll = () => {
-    if (selectedImages.size === images.length) {
-      setSelectedImages(new Set())
-    } else {
-      setSelectedImages(new Set(images.map((img) => img.id)))
-    }
-  }
+  const handleSelectAll = useCallback(() => {
+    setSelectedImages(prev => {
+      if (prev.size === images.length) {
+        return new Set()
+      } else {
+        return new Set(images.map((img) => img.id))
+      }
+    })
+  }, [images])
 
-  const handleToggleImage = (id: number) => {
-    const newSelected = new Set(selectedImages)
-    if (newSelected.has(id)) {
-      newSelected.delete(id)
-    } else {
-      newSelected.add(id)
-    }
-    setSelectedImages(newSelected)
-  }
+  const handleToggleImage = useCallback((id: number) => {
+    setSelectedImages(prev => {
+      const newSelected = new Set(prev)
+      if (newSelected.has(id)) {
+        newSelected.delete(id)
+      } else {
+        newSelected.add(id)
+      }
+      return newSelected
+    })
+  }, [])
 
   // Sorted images based on current sort option
   const sortedImages = useMemo(() => {
@@ -203,108 +207,108 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
       {/* Toolbar - Sticky only on desktop */}
       <div className="lg:sticky lg:top-14 lg:z-30 lg:-mx-4 lg:px-4 lg:pt-4 lg:pb-2 lg:bg-[#EEEEEE]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 sm:px-4 py-3 shadow-sm">
-        {/* Left side - Select All & Count */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <label className="flex cursor-pointer items-center gap-2">
-                <button
-                  onClick={handleSelectAll}
-                  className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${allSelected || someSelected ? "border-[#11224E] bg-[#11224E]" : "border-gray-300 bg-white"
-                    }`}
-                >
-                  {allSelected && <Check className="h-2.5 w-2.5 text-white" />}
-                  {someSelected && <Minus className="h-2.5 w-2.5 text-white" />}
-                </button>
-                <span className="text-xs font-medium text-slate-700">Select All</span>
-              </label>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={4}>
-              {allSelected ? "Deselect all images" : "Select all images"}
-            </TooltipContent>
-          </Tooltip>
-          <span className="h-4 w-px bg-gray-200" />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="text-xs text-slate-500 cursor-default">
-                <strong className="text-[#11224E]">{images.length}</strong> images found
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={4}>
-              Total images extracted from URL
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        {/* Right side - Sort & Download */}
-        <div className="flex items-center justify-between sm:justify-end gap-3 relative">
-          {/* Sort Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowSortMenu(!showSortMenu)}
-              className="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900"
-            >
-              <span className="hidden sm:inline">Sort by:</span> {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
-              <ChevronDown className={`h-3 w-3 transition-transform ${showSortMenu ? 'rotate-180' : ''}`} />
-            </button>
-            {showSortMenu && (
-              <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1 z-10 w-32 rounded-md border border-gray-200 bg-white shadow-lg">
-                <button
-                  onClick={() => handleSortChange('size')}
-                  className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-100 ${sortBy === 'size' ? 'bg-gray-50 font-medium' : ''}`}
-                >
-                  Size
-                </button>
-                <button
-                  onClick={() => handleSortChange('name')}
-                  className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-100 ${sortBy === 'name' ? 'bg-gray-50 font-medium' : ''}`}
-                >
-                  Name
-                </button>
-                <button
-                  onClick={() => handleSortChange('dimensions')}
-                  className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-100 ${sortBy === 'dimensions' ? 'bg-gray-50 font-medium' : ''}`}
-                >
-                  Dimensions
-                </button>
-              </div>
-            )}
+          {/* Left side - Select All & Count */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <label className="flex cursor-pointer items-center gap-2">
+                  <button
+                    onClick={handleSelectAll}
+                    className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${allSelected || someSelected ? "border-[#11224E] bg-[#11224E]" : "border-gray-300 bg-white"
+                      }`}
+                  >
+                    {allSelected && <Check className="h-2.5 w-2.5 text-white" />}
+                    {someSelected && <Minus className="h-2.5 w-2.5 text-white" />}
+                  </button>
+                  <span className="text-xs font-medium text-slate-700">Select All</span>
+                </label>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={4}>
+                {allSelected ? "Deselect all images" : "Select all images"}
+              </TooltipContent>
+            </Tooltip>
+            <span className="h-4 w-px bg-gray-200" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-xs text-slate-500 cursor-default">
+                  <strong className="text-[#11224E]">{images.length}</strong> images found
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={4}>
+                Total images extracted from URL
+              </TooltipContent>
+            </Tooltip>
           </div>
 
-          {/* Download ZIP Button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
+          {/* Right side - Sort & Download */}
+          <div className="flex items-center justify-between sm:justify-end gap-3 relative">
+            {/* Sort Dropdown */}
+            <div className="relative">
               <button
-                onClick={handleDownloadZip}
-                disabled={selectedImages.size === 0 || isDownloading}
-                className="flex items-center gap-1.5 sm:gap-2 rounded bg-[#F87B1B] px-2.5 sm:px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-[#e06c15] disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setShowSortMenu(!showSortMenu)}
+                className="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900"
               >
-                {isDownloading ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span className="hidden sm:inline">
-                      {downloadProgress
-                        ? `${downloadProgress.current}/${downloadProgress.total}`
-                        : 'Downloading...'}
-                    </span>
-                    <span className="sm:hidden">
-                      {downloadProgress ? `${downloadProgress.current}/${downloadProgress.total}` : '...'}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <Package className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Download ZIP ({selectedImages.size})</span>
-                    <span className="sm:hidden">ZIP ({selectedImages.size})</span>
-                  </>
-                )}
+                <span className="hidden sm:inline">Sort by:</span> {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
+                <ChevronDown className={`h-3 w-3 transition-transform ${showSortMenu ? 'rotate-180' : ''}`} />
               </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={4}>
-              {selectedImages.size === 0 ? "Select images first" : `Download ${selectedImages.size} images as ZIP`}
-            </TooltipContent>
-          </Tooltip>
-        </div>
+              {showSortMenu && (
+                <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1 z-10 w-32 rounded-md border border-gray-200 bg-white shadow-lg">
+                  <button
+                    onClick={() => handleSortChange('size')}
+                    className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-100 ${sortBy === 'size' ? 'bg-gray-50 font-medium' : ''}`}
+                  >
+                    Size
+                  </button>
+                  <button
+                    onClick={() => handleSortChange('name')}
+                    className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-100 ${sortBy === 'name' ? 'bg-gray-50 font-medium' : ''}`}
+                  >
+                    Name
+                  </button>
+                  <button
+                    onClick={() => handleSortChange('dimensions')}
+                    className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-100 ${sortBy === 'dimensions' ? 'bg-gray-50 font-medium' : ''}`}
+                  >
+                    Dimensions
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Download ZIP Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleDownloadZip}
+                  disabled={selectedImages.size === 0 || isDownloading}
+                  className="flex items-center gap-1.5 sm:gap-2 rounded bg-[#F87B1B] px-2.5 sm:px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-[#e06c15] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isDownloading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span className="hidden sm:inline">
+                        {downloadProgress
+                          ? `${downloadProgress.current}/${downloadProgress.total}`
+                          : 'Downloading...'}
+                      </span>
+                      <span className="sm:hidden">
+                        {downloadProgress ? `${downloadProgress.current}/${downloadProgress.total}` : '...'}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Package className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Download ZIP ({selectedImages.size})</span>
+                      <span className="sm:hidden">ZIP ({selectedImages.size})</span>
+                    </>
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={4}>
+                {selectedImages.size === 0 ? "Select images first" : `Download ${selectedImages.size} images as ZIP`}
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </div>
 

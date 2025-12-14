@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { Check, Download } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
@@ -13,23 +14,25 @@ interface ImageCardProps {
   onToggle: () => void
 }
 
-export function ImageCard({ src, name, dimensions, size, checked, onToggle }: ImageCardProps) {
+export const ImageCard = memo(function ImageCard({ src, name, dimensions, size, checked, onToggle }: ImageCardProps) {
   return (
     <div
-      className={`group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-lg border-2 bg-gray-100 transition-all duration-200 ${checked ? "border-[#F87B1B] shadow-md ring-1 ring-[#F87B1B]/20" : "border-gray-200 hover:border-gray-300"
+      className={`group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-lg border-2 bg-gray-100 will-change-transform ${checked ? "border-[#F87B1B] shadow-md ring-1 ring-[#F87B1B]/20" : "border-gray-200 hover:border-gray-300"
         }`}
       onClick={onToggle}
     >
       <img
         src={src || "/placeholder.svg"}
         alt={name}
-        className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${checked ? "opacity-100" : "opacity-90 group-hover:opacity-100"
+        loading="lazy"
+        decoding="async"
+        className={`h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-[1.03] ${checked ? "opacity-100" : "opacity-95 group-hover:opacity-100"
           }`}
       />
-      <div className={`absolute inset-0 transition-colors ${checked ? "bg-[#F87B1B]/10" : "bg-black/0 group-hover:bg-black/5"}`} />
+      <div className={`absolute inset-0 pointer-events-none ${checked ? "bg-[#F87B1B]/10" : ""}`} />
 
       {/* Top Overlay - Checkbox */}
-      <div className="absolute left-2 top-2 z-10 opacity-100 transition-opacity">
+      <div className="absolute left-2 top-2 z-10">
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -37,12 +40,12 @@ export function ImageCard({ src, name, dimensions, size, checked, onToggle }: Im
                 e.stopPropagation()
                 onToggle()
               }}
-              className={`flex items-center justify-center rounded-full border transition-all duration-200 h-10 w-10 sm:h-6 sm:w-6 ${checked
-                  ? "border-[#F87B1B] bg-[#F87B1B] text-white shadow-md scale-110"
-                  : "border-white/60 bg-black/30 hover:border-white hover:bg-black/40 text-transparent"
+              className={`flex items-center justify-center rounded-full border h-10 w-10 sm:h-6 sm:w-6 transition-colors duration-150 ${checked
+                ? "border-[#F87B1B] bg-[#F87B1B] text-white shadow-md"
+                : "border-white/60 bg-black/30 hover:border-white hover:bg-black/40 text-transparent"
                 }`}
             >
-              <Check className={`h-5 w-5 sm:h-3.5 sm:w-3.5 ${checked ? "scale-100" : "scale-75"}`} strokeWidth={3} />
+              <Check className={`h-5 w-5 sm:h-3.5 sm:w-3.5 ${checked ? "opacity-100" : "opacity-0"}`} strokeWidth={3} />
             </button>
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={4}>
@@ -52,7 +55,7 @@ export function ImageCard({ src, name, dimensions, size, checked, onToggle }: Im
       </div>
 
       {/* Bottom Info */}
-      <div className="absolute bottom-0 left-0 right-0 translate-y-full border-t border-white/20 bg-white/95 p-3 backdrop-blur-sm transition-transform duration-300 group-hover:translate-y-0">
+      <div className="absolute bottom-0 left-0 right-0 translate-y-full border-t border-white/20 bg-white/95 p-3 backdrop-blur-sm transition-transform duration-200 ease-out group-hover:translate-y-0">
         <div className="flex items-start justify-between">
           <div>
             <Tooltip>
@@ -81,5 +84,5 @@ export function ImageCard({ src, name, dimensions, size, checked, onToggle }: Im
       </div>
     </div>
   )
-}
+})
 
