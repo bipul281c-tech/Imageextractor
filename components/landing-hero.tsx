@@ -3,8 +3,7 @@
 import { useState } from "react"
 import { Link, ArrowRight, Loader2 } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { ScanProgress } from "@/components/scan-progress"
-import { ScrapingStatus } from "@/components/scraping-status"
+
 
 interface LandingHeroProps {
     title: string
@@ -15,6 +14,8 @@ interface LandingHeroProps {
     isLimitReached?: boolean
     defaultUrl?: string
     ctaText?: string
+    isQueued?: boolean
+    queuePosition?: number
 }
 
 export function LandingHero({
@@ -25,7 +26,9 @@ export function LandingHero({
     status = "Ready",
     isLimitReached = false,
     defaultUrl = "https://unsplash.com/wallpapers",
-    ctaText = "Extract Images"
+    ctaText = "Extract Images",
+    isQueued = false,
+    queuePosition = 0
 }: LandingHeroProps) {
     const [url, setUrl] = useState(defaultUrl)
 
@@ -90,11 +93,7 @@ export function LandingHero({
                             {isLimitReached ? "Daily limit reached" : isLoading ? "Extracting images..." : "Extract images from URL"}
                         </TooltipContent>
                     </Tooltip>
-                    {isLoading && (
-                        <div className="absolute inset-x-0 bottom-0 h-[2px]">
-                            <ScanProgress className="h-full w-full rounded-none bg-transparent" />
-                        </div>
-                    )}
+
                 </div>
                 <div className="mt-2 flex items-center justify-center">
                     <span className={`text-[10px] font-medium uppercase tracking-wider ${status === "Ready" ? "text-slate-400" :
@@ -105,9 +104,13 @@ export function LandingHero({
                     </span>
                 </div>
 
-                {/* Animated scraping status */}
-                {isLoading && (
-                    <ScrapingStatus isLoading={isLoading} className="mt-4" />
+
+
+                {/* Inline Queue Status - Text Only */}
+                {isQueued && (
+                    <div className="mt-4 text-sm text-slate-500 animate-pulse">
+                        Waiting in queue... Position: <span className="font-semibold text-[#F87B1B]">#{queuePosition}</span>
+                    </div>
                 )}
             </div>
         </div>

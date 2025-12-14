@@ -6,7 +6,7 @@ import { LandingHero } from "@/components/landing-hero"
 import { FiltersSidebar } from "@/components/filters-sidebar"
 import { ImageGrid } from "@/components/image-grid"
 import { Footer } from "@/components/footer"
-import { QueueWaitingModal } from "@/components/queue-waiting-modal"
+
 import { useRequestQueue } from "@/hooks/use-request-queue"
 import { ImageData, ScrapeResponse } from "@/lib/types/scraper"
 import { filterImages } from "@/lib/filter-utils"
@@ -86,6 +86,8 @@ export default function UrlOpenerPage() {
                         isLoading={loading}
                         status={status}
                         ctaText="Open URL"
+                        isQueued={isQueued}
+                        queuePosition={queuePosition}
                     />
                 </section>
 
@@ -138,7 +140,7 @@ export default function UrlOpenerPage() {
                 <RelatedTools currentSlug="url-opener" />
             </main>
             <Footer />
-            <QueueWaitingModal isVisible={isQueued} queuePosition={queuePosition} />
+
         </div>
     )
 }

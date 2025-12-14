@@ -1,23 +1,77 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, ArrowRight, Settings2, Loader2 } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { ScanProgress } from "@/components/scan-progress"
-import { ScrapingStatus } from "@/components/scraping-status"
+
+const SCAN_MESSAGES = [
+  "Throttling server",
+  "Opening browser",
+  "Scrolling page",
+  "Getting your butter",
+]
+
+const MESSAGE_ROTATE_INTERVAL = 3750 // Rotate message every 3.75 seconds (all 4 messages in 15 seconds)
+const SCAN_DURATION = 17000 // 17 seconds
 
 interface SearchSectionProps {
   onScan: (url: string) => Promise<void>;
   isLoading?: boolean;
   status?: string;
+  isQueued?: boolean;
+  queuePosition?: number;
 }
 
 export function SearchSection({
   onScan,
   isLoading = false,
   status = "Ready",
+  isQueued = false,
+  queuePosition = 0
 }: SearchSectionProps) {
   const [url, setUrl] = useState("https://unsplash.com/wallpapers")
+  const [progress, setProgress] = useState(0)
+  const [messageIndex, setMessageIndex] = useState(0)
+
+  // Progress bar animation when loading
+  useEffect(() => {
+    if (!isLoading) {
+      setProgress(0)
+      return
+    }
+
+    const startTime = Date.now()
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime
+      const newProgress = Math.min((elapsed / SCAN_DURATION) * 100, 95) // Cap at 95% until complete
+      setProgress(newProgress)
+    }, 50) // Smoother animation
+
+    return () => clearInterval(interval)
+  }, [isLoading])
+
+  // Rotate messages frequently
+  useEffect(() => {
+    if (!isLoading) {
+      setMessageIndex(0)
+      return
+    }
+
+    const interval = setInterval(() => {
+      setMessageIndex(prev => (prev + 1) % SCAN_MESSAGES.length)
+    }, MESSAGE_ROTATE_INTERVAL)
+
+    return () => clearInterval(interval)
+  }, [isLoading])
+
+  // Complete progress when scan finishes
+  useEffect(() => {
+    if (!isLoading && status !== "Ready" && status !== "Scanning..." && !status.startsWith("Error")) {
+      setProgress(100)
+    }
+  }, [isLoading, status])
+
+  const currentMessage = SCAN_MESSAGES[messageIndex]
 
   const handleScan = async () => {
     if (url.trim()) {
@@ -78,35 +132,86 @@ export function SearchSection({
               {isLoading ? "Extracting images..." : "Extract images from URL"}
             </TooltipContent>
           </Tooltip>
-          {isLoading && (
-            <div className="absolute inset-x-0 bottom-0 h-[2px]">
-              <ScanProgress className="h-full w-full rounded-none bg-transparent" />
+
+        </div>
+        <div className="mt-3 px-1">
+          {isLoading ? (
+            <div className="space-y-2">
+              {/* Progress Bar */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-200 cursor-pointer shadow-inner">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#F87B1B] via-[#f59e0b] to-[#F87B1B] transition-all duration-150 ease-out relative"
+                      style={{
+                        width: `${progress}%`,
+                        backgroundSize: '200% 100%',
+                        animation: 'shimmer 1.5s infinite linear'
+                      }}
+                    >
+                      {/* Glow effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                           style={{ animation: 'shimmer 1.5s infinite linear' }} />
+                    </div>
+                    {/* Pulse ring on the edge */}
+                    <div
+                      className="absolute top-0 h-full w-1 bg-white/80 rounded-full shadow-[0_0_8px_2px_rgba(248,123,27,0.6)]"
+                      style={{ left: `calc(${progress}% - 2px)`, display: progress > 2 ? 'block' : 'none' }}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={8} className="bg-slate-800 text-white">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span>{currentMessage}</span>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+              {/* Progress Text */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 animate-spin text-[#F87B1B]" />
+                  <span
+                    key={messageIndex}
+                    className="text-xs font-medium text-[#F87B1B] animate-fade-in"
+                  >
+                    {currentMessage}...
+                  </span>
+                </div>
+                <span className="text-xs font-semibold text-slate-600">
+                  {Math.round(progress)}%
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span className={`text-[10px] font-medium uppercase tracking-wider ${status === "Ready" ? "text-slate-400" :
+                status.startsWith("Error") ? "text-red-500" : "text-green-500"
+                }`}>
+                Status: {status}
+              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="flex items-center gap-1 text-[10px] font-medium text-slate-400 hover:text-slate-900">
+                    <Settings2 className="h-3 w-3" />
+                    Advanced Settings
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={4}>
+                  Configure extraction options
+                </TooltipContent>
+              </Tooltip>
             </div>
           )}
         </div>
-        <div className="mt-2 flex items-center justify-between px-1">
-          <span className={`text-[10px] font-medium uppercase tracking-wider ${status === "Ready" ? "text-slate-400" :
-            status === "Scanning..." ? "text-blue-500" :
-              status.startsWith("Error") ? "text-red-500" : "text-green-500"
-            }`}>
-            Status: {status}
-          </span>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="flex items-center gap-1 text-[10px] font-medium text-slate-400 hover:text-slate-900">
-                <Settings2 className="h-3 w-3" />
-                Advanced Settings
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={4}>
-              Configure extraction options
-            </TooltipContent>
-          </Tooltip>
-        </div>
 
-        {/* Animated scraping status */}
-        {isLoading && (
-          <ScrapingStatus isLoading={isLoading} className="mt-4" />
+
+
+        {/* Inline Queue Status - Text Only */}
+        {isQueued && (
+          <div className="mt-4 text-sm text-slate-500 animate-pulse">
+            Waiting in queue... Position: <span className="font-semibold text-[#F87B1B]">#{queuePosition}</span>
+          </div>
         )}
       </div>
     </div>

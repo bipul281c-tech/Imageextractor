@@ -8,7 +8,7 @@ import { ImageGrid } from "@/components/image-grid"
 import { Footer } from "@/components/footer"
 import { SEOContent } from "@/components/seo-content"
 import { FAQSection } from "@/components/faq-section"
-import { QueueWaitingModal } from "@/components/queue-waiting-modal"
+
 import { useRequestQueue } from "@/hooks/use-request-queue"
 import { ImageData, ScrapeResponse } from "@/lib/types/scraper"
 import { filterImages } from "@/lib/filter-utils"
@@ -89,6 +89,8 @@ export default function Home() {
             onScan={handleScan}
             isLoading={loading}
             status={status}
+            isQueued={isQueued}
+            queuePosition={queuePosition}
           />
         </section>
 
@@ -114,7 +116,7 @@ export default function Home() {
         <FAQSection />
       </main>
       <Footer />
-      <QueueWaitingModal isVisible={isQueued} queuePosition={queuePosition} />
+
     </div>
   )
 }

@@ -46,6 +46,8 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
   const [showSortMenu, setShowSortMenu] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
 
+  const [downloadProgress, setDownloadProgress] = useState<{ current: number; total: number } | null>(null)
+
   // Update selection when images change
   useEffect(() => {
     setSelectedImages(new Set(images.filter((img) => img.defaultChecked).map((img) => img.id)))
@@ -96,9 +98,12 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
     if (selectedImages.size === 0) return
 
     setIsDownloading(true)
+    setDownloadProgress({ current: 0, total: selectedImages.size })
+
     try {
       const zip = new JSZip()
       const selectedImagesList = images.filter(img => selectedImages.has(img.id))
+      let completedCount = 0
 
       // Fetch all images in parallel
       const imagePromises = selectedImagesList.map(async (img) => {
@@ -106,9 +111,15 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
           const response = await fetch(img.src)
           if (!response.ok) throw new Error(`Failed to fetch ${img.name}`)
           const blob = await response.blob()
+
+          completedCount++
+          setDownloadProgress({ current: completedCount, total: selectedImages.size })
+
           return { name: img.name, blob }
         } catch (error) {
           console.error(`Error fetching image ${img.name}:`, error)
+          completedCount++
+          setDownloadProgress({ current: completedCount, total: selectedImages.size })
           return null
         }
       })
@@ -129,6 +140,7 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
       console.error('Error creating ZIP:', error)
     } finally {
       setIsDownloading(false)
+      setDownloadProgress(null)
     }
   }
 
@@ -264,11 +276,20 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
                 className="flex items-center gap-2 rounded bg-[#F87B1B] px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-[#e06c15] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isDownloading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>
+                      {downloadProgress
+                        ? `Downloading ${downloadProgress.current}/${downloadProgress.total}`
+                        : 'Downloading...'}
+                    </span>
+                  </>
                 ) : (
-                  <Package className="h-3.5 w-3.5" />
+                  <>
+                    <Package className="h-3.5 w-3.5" />
+                    <span>Download ZIP ({selectedImages.size})</span>
+                  </>
                 )}
-                {isDownloading ? 'Downloading...' : `Download ZIP (${selectedImages.size})`}
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" sideOffset={4}>
