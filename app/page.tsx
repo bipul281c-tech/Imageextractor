@@ -96,16 +96,20 @@ export default function Home() {
 
         {/* Results Section */}
         <section aria-label="Image extraction results">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            <FiltersSidebar
-              images={images}
-              onFiltersChange={handleFiltersChange}
-            />
-            <ImageGrid
-              images={filteredImages}
-              loading={loading}
-              error={error}
-            />
+          <div className="grid grid-cols-1 gap-4 lg:gap-8 lg:grid-cols-12">
+            <div className="lg:col-span-3">
+              <FiltersSidebar
+                images={images}
+                onFiltersChange={handleFiltersChange}
+              />
+            </div>
+            <div className="lg:col-span-9">
+              <ImageGrid
+                images={filteredImages}
+                loading={loading}
+                error={error}
+              />
+            </div>
           </div>
         </section>
 

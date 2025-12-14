@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Check, Download } from "lucide-react"
+import { Check, Download, X } from "lucide-react"
 import { ImageData } from "@/lib/types/scraper"
 import { calculateFilterStats } from "@/lib/filter-utils"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
@@ -31,6 +31,32 @@ function FilterCheckbox({ label, count, checked, onChange }: FilterCheckboxProps
       <span className="text-xs text-slate-600">{label}</span>
       <span className="ml-auto text-[10px] text-slate-400">{count}</span>
     </label>
+  )
+}
+
+// Format chip for mobile view
+interface FormatChipProps {
+  label: string
+  count: number
+  selected: boolean
+  onToggle: () => void
+}
+
+function FormatChip({ label, count, selected, onToggle }: FormatChipProps) {
+  return (
+    <button
+      onClick={onToggle}
+      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+        selected
+          ? "bg-[#11224E] text-white"
+          : "bg-gray-100 text-slate-600 hover:bg-gray-200"
+      }`}
+    >
+      {label}
+      <span className={`text-[10px] ${selected ? "text-white/70" : "text-slate-400"}`}>
+        {count}
+      </span>
+    </button>
   )
 }
 
@@ -77,10 +103,63 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
 
   const hasImages = images.length > 0
 
+  const activeFiltersCount = selectedFormats.size + (minWidth > 0 ? 1 : 0)
+
   return (
-    <aside className="lg:col-span-3">
-      <div className="sticky top-20 space-y-6 rounded-lg border border-gray-200 bg-white p-5">
-        <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+    <aside>
+      {/* Mobile: Horizontal Filter Bar - Always Visible */}
+      <div className="lg:hidden rounded-lg border border-gray-200 bg-white p-3">
+        {/* Format Chips */}
+        {hasImages && formatEntries.length > 0 ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Filter by format</span>
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={handleReset}
+                  className="flex items-center gap-1 text-[10px] font-medium text-[#F87B1B]"
+                >
+                  <X className="h-3 w-3" />
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {formatEntries.map(([format, count]) => (
+                <FormatChip
+                  key={format}
+                  label={format}
+                  count={count}
+                  selected={selectedFormats.has(format)}
+                  onToggle={() => handleFormatToggle(format, !selectedFormats.has(format))}
+                />
+              ))}
+            </div>
+            {/* Min Width Slider - Compact */}
+            <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+              <span className="text-[10px] font-medium text-slate-500 whitespace-nowrap">Min Width</span>
+              <input
+                type="range"
+                min="0"
+                max="2000"
+                step="100"
+                value={minWidth}
+                onChange={(e) => setMinWidth(Number(e.target.value))}
+                className="range-slider flex-1"
+              />
+              <span className="text-[10px] font-medium text-[#11224E] w-12 text-right">{minWidth}px</span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-2">
+            <span className="text-xs text-slate-400">Scan a URL to filter images</span>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: Full Sidebar */}
+      <div className="hidden lg:block sticky top-20 rounded-lg border border-gray-200 bg-white">
+        <div className="flex items-center justify-between border-b border-gray-100 p-5 pb-2">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-[#11224E]">Filters</h3>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -97,80 +176,82 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
           </Tooltip>
         </div>
 
-        {/* Filter: Format */}
-        <div className="space-y-3">
-          <label className="text-xs font-medium text-slate-700">File Format</label>
-          <div className="space-y-2">
-            {hasImages ? (
-              formatEntries.length > 0 ? (
-                formatEntries.map(([format, count]) => (
-                  <FilterCheckbox
-                    key={format}
-                    label={format}
-                    count={count}
-                    checked={selectedFormats.has(format)}
-                    onChange={(checked) => handleFormatToggle(format, checked)}
-                  />
-                ))
+        <div className="space-y-6 p-5 pt-4">
+          {/* Filter: Format */}
+          <div className="space-y-3">
+            <label className="text-xs font-medium text-slate-700">File Format</label>
+            <div className="space-y-2">
+              {hasImages ? (
+                formatEntries.length > 0 ? (
+                  formatEntries.map(([format, count]) => (
+                    <FilterCheckbox
+                      key={format}
+                      label={format}
+                      count={count}
+                      checked={selectedFormats.has(format)}
+                      onChange={(checked) => handleFormatToggle(format, checked)}
+                    />
+                  ))
+                ) : (
+                  <p className="text-xs text-slate-400">No formats detected</p>
+                )
               ) : (
-                <p className="text-xs text-slate-400">No formats detected</p>
-              )
-            ) : (
-              <p className="text-xs text-slate-400 italic">Scan a URL to see formats</p>
-            )}
-          </div>
-        </div>
-
-        {/* Filter: Size */}
-        <div className="space-y-3 border-t border-gray-50 pt-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-slate-700">Min Width</label>
-            <span className="text-[10px] text-slate-400">{minWidth}px</span>
-          </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <input
-                type="range"
-                min="0"
-                max="2000"
-                step="100"
-                value={minWidth}
-                onChange={(e) => setMinWidth(Number(e.target.value))}
-                className="range-slider w-full"
-                disabled={!hasImages}
-              />
-            </TooltipTrigger>
-            <TooltipContent side="top" sideOffset={4}>
-              {minWidth === 0 ? "No minimum width filter" : `Filter images wider than ${minWidth}px`}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        {/* Stats summary */}
-        {hasImages && (
-          <div className="border-t border-gray-50 pt-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Total images</span>
-              <span className="font-medium text-[#11224E]">{stats.totalCount}</span>
+                <p className="text-xs text-slate-400 italic">Scan a URL to see formats</p>
+              )}
             </div>
           </div>
-        )}
 
-        <div className="mt-4 border-t border-gray-100 pt-4">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="flex w-full items-center justify-center gap-2 rounded border border-gray-200 bg-white py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-gray-50 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!hasImages}
-              >
-                <Download className="h-3.5 w-3.5" />
-                Export Filter Config
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top" sideOffset={4}>
-              Export current filter settings
-            </TooltipContent>
-          </Tooltip>
+          {/* Filter: Size */}
+          <div className="space-y-3 border-t border-gray-50 pt-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-slate-700">Min Width</label>
+              <span className="text-[10px] text-slate-400">{minWidth}px</span>
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <input
+                  type="range"
+                  min="0"
+                  max="2000"
+                  step="100"
+                  value={minWidth}
+                  onChange={(e) => setMinWidth(Number(e.target.value))}
+                  className="range-slider w-full"
+                  disabled={!hasImages}
+                />
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={4}>
+                {minWidth === 0 ? "No minimum width filter" : `Filter images wider than ${minWidth}px`}
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          {/* Stats summary */}
+          {hasImages && (
+            <div className="border-t border-gray-50 pt-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">Total images</span>
+                <span className="font-medium text-[#11224E]">{stats.totalCount}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex w-full items-center justify-center gap-2 rounded border border-gray-200 bg-white py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-gray-50 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!hasImages}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Export Filter Config
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={4}>
+                Export current filter settings
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </div>
     </aside>

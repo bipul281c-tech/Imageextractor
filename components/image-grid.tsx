@@ -150,11 +150,11 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
   // Error state
   if (error) {
     return (
-      <div className="lg:col-span-9">
-        <div className="flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-12 text-center">
-          <ImageOff className="h-12 w-12 text-red-400 mb-4" />
-          <h3 className="text-lg font-medium text-red-900 mb-2">Scraping Failed</h3>
-          <p className="text-sm text-red-600">{error}</p>
+      <div>
+        <div className="flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-8 sm:p-12 text-center">
+          <ImageOff className="h-10 w-10 sm:h-12 sm:w-12 text-red-400 mb-4" />
+          <h3 className="text-base sm:text-lg font-medium text-red-900 mb-2">Scraping Failed</h3>
+          <p className="text-xs sm:text-sm text-red-600">{error}</p>
         </div>
       </div>
     )
@@ -163,18 +163,18 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-4 lg:col-span-9">
-        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
-          <div className="flex items-center gap-4">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 sm:px-4 py-3">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div className="h-4 w-4 rounded bg-gray-200 animate-pulse" />
-            <span className="h-4 w-20 rounded bg-gray-200 animate-pulse" />
+            <span className="h-4 w-16 sm:w-20 rounded bg-gray-200 animate-pulse" />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="aspect-[4/3] rounded-lg border border-gray-200 bg-gray-100 animate-pulse">
               <div className="flex h-full flex-col items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
+                <div className="h-6 w-6 sm:h-8 sm:w-8 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
                 <span className="mt-2 text-[10px] text-slate-400">Scanning...</span>
               </div>
             </div>
@@ -187,21 +187,22 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
   // Empty state
   if (images.length === 0) {
     return (
-      <div className="lg:col-span-9">
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-12 text-center">
-          <ImageOff className="h-12 w-12 text-slate-300 mb-4" />
-          <h3 className="text-lg font-medium text-[#11224E] mb-2">No images found</h3>
-          <p className="text-sm text-slate-500">Enter a URL and click Scan to extract images from a webpage.</p>
+      <div>
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-8 sm:p-12 text-center">
+          <ImageOff className="h-10 w-10 sm:h-12 sm:w-12 text-slate-300 mb-4" />
+          <h3 className="text-base sm:text-lg font-medium text-[#11224E] mb-2">No images found</h3>
+          <p className="text-xs sm:text-sm text-slate-500">Enter a URL and click Scan to extract images from a webpage.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4 lg:col-span-9">
+    <div className="space-y-4">
       {/* Toolbar */}
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 sm:px-4 py-3">
+        {/* Left side - Select All & Count */}
+        <div className="flex items-center gap-3 sm:gap-4">
           <Tooltip>
             <TooltipTrigger asChild>
               <label className="flex cursor-pointer items-center gap-2">
@@ -233,18 +234,19 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
           </Tooltip>
         </div>
 
-        <div className="flex items-center gap-3 relative">
+        {/* Right side - Sort & Download */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 relative">
           {/* Sort Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowSortMenu(!showSortMenu)}
               className="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900"
             >
-              Sort by: {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
+              <span className="hidden sm:inline">Sort by:</span> {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
               <ChevronDown className={`h-3 w-3 transition-transform ${showSortMenu ? 'rotate-180' : ''}`} />
             </button>
             {showSortMenu && (
-              <div className="absolute right-0 top-full mt-1 z-10 w-32 rounded-md border border-gray-200 bg-white">
+              <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1 z-10 w-32 rounded-md border border-gray-200 bg-white shadow-lg">
                 <button
                   onClick={() => handleSortChange('size')}
                   className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-100 ${sortBy === 'size' ? 'bg-gray-50 font-medium' : ''}`}
@@ -273,21 +275,25 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
               <button
                 onClick={handleDownloadZip}
                 disabled={selectedImages.size === 0 || isDownloading}
-                className="flex items-center gap-2 rounded bg-[#F87B1B] px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-[#e06c15] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 sm:gap-2 rounded bg-[#F87B1B] px-2.5 sm:px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-[#e06c15] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isDownloading ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>
+                    <span className="hidden sm:inline">
                       {downloadProgress
-                        ? `Downloading ${downloadProgress.current}/${downloadProgress.total}`
+                        ? `${downloadProgress.current}/${downloadProgress.total}`
                         : 'Downloading...'}
+                    </span>
+                    <span className="sm:hidden">
+                      {downloadProgress ? `${downloadProgress.current}/${downloadProgress.total}` : '...'}
                     </span>
                   </>
                 ) : (
                   <>
                     <Package className="h-3.5 w-3.5" />
-                    <span>Download ZIP ({selectedImages.size})</span>
+                    <span className="hidden sm:inline">Download ZIP ({selectedImages.size})</span>
+                    <span className="sm:hidden">ZIP ({selectedImages.size})</span>
                   </>
                 )}
               </button>
@@ -300,7 +306,7 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {sortedImages.map((image) => (
           <ImageCard
             key={image.id}
