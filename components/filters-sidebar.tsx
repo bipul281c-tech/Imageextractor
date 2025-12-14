@@ -106,9 +106,9 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
   const activeFiltersCount = selectedFormats.size + (minWidth > 0 ? 1 : 0)
 
   return (
-    <aside className="lg:self-start lg:sticky lg:top-24">
-      {/* Mobile: Horizontal Filter Bar - Always Visible */}
-      <div className="lg:hidden rounded-lg border border-gray-200 bg-white p-3">
+    <aside>
+      {/* Mobile: Horizontal Filter Bar - Always Visible & Sticky */}
+      <div className="lg:hidden rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
         {/* Format Chips */}
         {hasImages && formatEntries.length > 0 ? (
           <div className="space-y-3">

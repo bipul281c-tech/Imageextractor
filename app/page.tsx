@@ -97,7 +97,7 @@ export default function Home() {
         {/* Results Section */}
         <section aria-label="Image extraction results">
           <div className="grid grid-cols-1 gap-4 lg:gap-8 lg:grid-cols-12 lg:items-start">
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 sticky top-14 z-40 bg-[#EEEEEE] py-2 lg:py-4">
               <FiltersSidebar
                 images={images}
                 onFiltersChange={handleFiltersChange}

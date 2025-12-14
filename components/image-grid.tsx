@@ -5,6 +5,7 @@ import { Check, Minus, ChevronDown, Package, ArrowDown, ImageOff, Loader2 } from
 import JSZip from "jszip"
 import { saveAs } from "file-saver"
 import { ImageCard } from "./image-card"
+import { MobileActionBar } from "./mobile-action-bar"
 import { ImageData } from "@/lib/types/scraper"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
@@ -199,8 +200,9 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 sm:px-4 py-3">
+      {/* Toolbar - Sticky only on desktop */}
+      <div className="lg:sticky lg:top-14 lg:z-30 lg:-mx-4 lg:px-4 lg:pt-4 lg:pb-2 lg:bg-[#EEEEEE]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 sm:px-4 py-3 shadow-sm">
         {/* Left side - Select All & Count */}
         <div className="flex items-center gap-3 sm:gap-4">
           <Tooltip>
@@ -303,10 +305,11 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
             </TooltipContent>
           </Tooltip>
         </div>
+        </div>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      {/* Grid - with mobile bottom padding for action bar */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 pb-20 lg:pb-0">
         {sortedImages.map((image) => (
           <ImageCard
             key={image.id}
@@ -326,6 +329,18 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
           </button>
         </div>
       )}
+
+      {/* Mobile Sticky Action Bar */}
+      <MobileActionBar
+        totalImages={images.length}
+        selectedCount={selectedImages.size}
+        isAllSelected={allSelected}
+        isSomeSelected={someSelected}
+        isDownloading={isDownloading}
+        downloadProgress={downloadProgress}
+        onSelectAll={handleSelectAll}
+        onDownload={handleDownloadZip}
+      />
     </div>
   )
 }

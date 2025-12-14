@@ -37,12 +37,12 @@ export function ImageCard({ src, name, dimensions, size, checked, onToggle }: Im
                 e.stopPropagation()
                 onToggle()
               }}
-              className={`flex h-6 w-6 items-center justify-center rounded-full border transition-all duration-200 ${checked
-                  ? "border-[#F87B1B] bg-[#F87B1B] text-white shadow-sm"
-                  : "border-white/60 bg-black/20 hover:border-white hover:bg-black/30 text-transparent"
+              className={`flex items-center justify-center rounded-full border transition-all duration-200 h-10 w-10 sm:h-6 sm:w-6 ${checked
+                  ? "border-[#F87B1B] bg-[#F87B1B] text-white shadow-md scale-110"
+                  : "border-white/60 bg-black/30 hover:border-white hover:bg-black/40 text-transparent"
                 }`}
             >
-              <Check className={`h-3.5 w-3.5 ${checked ? "scale-100" : "scale-75"}`} strokeWidth={3} />
+              <Check className={`h-5 w-5 sm:h-3.5 sm:w-3.5 ${checked ? "scale-100" : "scale-75"}`} strokeWidth={3} />
             </button>
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={4}>
