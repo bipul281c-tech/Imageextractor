@@ -6,9 +6,7 @@ import { LandingHero } from "@/components/landing-hero"
 import { FiltersSidebar } from "@/components/filters-sidebar"
 import { ImageGrid } from "@/components/image-grid"
 import { Footer } from "@/components/footer"
-import { UsageBanner } from "@/components/usage-banner"
 import { QueueWaitingModal } from "@/components/queue-waiting-modal"
-import { useUsageLimit } from "@/hooks/use-usage-limit"
 import { useRequestQueue } from "@/hooks/use-request-queue"
 import { ImageData, ScrapeResponse } from "@/lib/types/scraper"
 import { filterImages } from "@/lib/filter-utils"
@@ -25,16 +23,9 @@ export default function VideoDownloaderPage() {
         minWidth: number;
     }>({ selectedFormats: new Set(), minWidth: 0 })
 
-    const usageLimit = useUsageLimit()
     const { isQueued, queuePosition, queueRequest } = useRequestQueue()
 
     const handleScan = async (url: string) => {
-        if (usageLimit.isLimitReached) {
-            setError("Daily limit reached. Please try again tomorrow.")
-            setStatus("Limit Reached")
-            return
-        }
-
         setLoading(true)
         setError(undefined)
         setStatus("Extracting media...")
@@ -49,7 +40,6 @@ export default function VideoDownloaderPage() {
                     credentials: 'include',
                 })
 
-                usageLimit.updateFromResponse(response)
                 const data: ScrapeResponse = await response.json()
 
                 if (!data.success) {
@@ -104,23 +94,10 @@ export default function VideoDownloaderPage() {
                         onScan={handleScan}
                         isLoading={loading}
                         status={status}
-                        isLimitReached={usageLimit.isLimitReached}
                         defaultUrl="https://www.youtube.com"
                         ctaText="Extract Images"
                     />
                 </section>
-
-                <div className="mb-6" role="status" aria-live="polite">
-                    <UsageBanner
-                        remaining={usageLimit.remaining}
-                        limit={usageLimit.limit}
-                        isLimitReached={usageLimit.isLimitReached}
-                        isWarning={usageLimit.isWarning}
-                        resetAt={usageLimit.resetAt}
-                        isLoggedIn={usageLimit.isLoggedIn}
-                        isLoading={usageLimit.isLoading}
-                    />
-                </div>
 
                 <section aria-label="Media extraction results">
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">

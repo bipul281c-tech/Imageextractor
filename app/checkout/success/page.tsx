@@ -4,10 +4,8 @@ import { useEffect, useState } from "react"
 import { CheckCircle2, Sparkles, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useUser } from "@/hooks/use-user"
 
 export default function CheckoutSuccessPage() {
-    const { user } = useUser()
     const [credits, setCredits] = useState<number | null>(null)
     const [planName, setPlanName] = useState<string>("")
     const [syncing, setSyncing] = useState(true)
@@ -16,8 +14,6 @@ export default function CheckoutSuccessPage() {
 
     useEffect(() => {
         async function syncSubscription() {
-            if (!user) return
-
             setSyncing(true)
 
             try {
@@ -53,7 +49,7 @@ export default function CheckoutSuccessPage() {
         }
 
         syncSubscription()
-    }, [user, syncAttempts])
+    }, [syncAttempts])
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center px-4">
