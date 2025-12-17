@@ -25,6 +25,7 @@ export default function WebsiteImageExtractorPage() {
   }>({ selectedFormats: new Set(), minWidth: 0, selectedSourceUrls: new Set() })
   const [batchMode, setBatchMode] = useState(false)
   const [batchProgress, setBatchProgress] = useState<BatchUrlState[]>([])
+  const [deepScrape, setDeepScrape] = useState(true)
 
   const { isQueued, queuePosition, queueRequest } = useRequestQueue()
 
@@ -41,7 +42,7 @@ export default function WebsiteImageExtractorPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ url }),
+          body: JSON.stringify({ url, deepScrape }),
           credentials: 'include',
         })
 
@@ -90,7 +91,7 @@ export default function WebsiteImageExtractorPage() {
         const response = await fetch("/api/scrape", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
+          body: JSON.stringify({ url, deepScrape }),
           credentials: 'include',
         })
 
@@ -181,6 +182,8 @@ export default function WebsiteImageExtractorPage() {
             batchProgress={batchProgress}
             batchMode={batchMode}
             onBatchModeChange={setBatchMode}
+            deepScrape={deepScrape}
+            onDeepScrapeChange={setDeepScrape}
           />
         </section>
 

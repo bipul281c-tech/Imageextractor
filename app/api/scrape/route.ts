@@ -8,7 +8,7 @@ const IMAGE_SCRAPER_API_URL = process.env.IMAGE_SCRAPER_API_URL;
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { url } = body;
+        const { url, deepScrape = true } = body;
 
         if (!url) {
             return NextResponse.json<ScrapeResponse>(
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Call Image Scraper API
-        const scraperUrl = `${IMAGE_SCRAPER_API_URL}/images?url=${encodeURIComponent(normalizedUrl)}`;
+        const scraperUrl = `${IMAGE_SCRAPER_API_URL}/images?url=${encodeURIComponent(normalizedUrl)}&deep_scrape=${deepScrape}`;
 
         let scraperResponse: Response;
         try {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link, ArrowRight, Settings2, Loader2, List, Info } from "lucide-react"
+import { Link, ArrowRight, Settings2, Loader2, List, Info, Zap, Layers } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { BatchUrlInput } from "@/components/batch-url-input"
 import { BatchUrlProgress } from "@/components/batch-url-progress"
@@ -27,6 +27,8 @@ interface SearchSectionProps {
   batchProgress?: BatchUrlState[];
   batchMode?: boolean;
   onBatchModeChange?: (mode: boolean) => void;
+  deepScrape?: boolean;
+  onDeepScrapeChange?: (deep: boolean) => void;
 }
 
 export function SearchSection({
@@ -37,7 +39,9 @@ export function SearchSection({
   queuePosition = 0,
   batchProgress = [],
   batchMode = false,
-  onBatchModeChange
+  onBatchModeChange,
+  deepScrape = true,
+  onDeepScrapeChange
 }: SearchSectionProps) {
   const [url, setUrl] = useState("")
   const [batchUrls, setBatchUrls] = useState("")
@@ -242,10 +246,64 @@ export function SearchSection({
           )}
         </div>
 
+        {/* Scrape Mode Toggle */}
+        {onDeepScrapeChange && (
+          <div className="flex items-center justify-center mt-3">
+            <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => !isLoading && deepScrape && onDeepScrapeChange(false)}
+                    disabled={isLoading}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${!deepScrape
+                        ? 'bg-green-500 text-white shadow-sm'
+                        : 'bg-transparent text-slate-500 hover:text-slate-700'
+                      }`}
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                    Quick Scan
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={4} className="max-w-xs text-center">
+                  <div className="space-y-1">
+                    <p className="font-medium">Quick Scan Mode</p>
+                    <p className="text-xs text-slate-400">Scans only the initial page. Faster results, but may miss images from lazy-loaded content or pagination.</p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => !isLoading && !deepScrape && onDeepScrapeChange(true)}
+                    disabled={isLoading}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${deepScrape
+                        ? 'bg-[#F87B1B] text-white shadow-sm'
+                        : 'bg-transparent text-slate-500 hover:text-slate-700'
+                      }`}
+                  >
+                    <Layers className="h-3.5 w-3.5" />
+                    Deep Scan
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={4} className="max-w-xs text-center">
+                  <div className="space-y-1">
+                    <p className="font-medium">Deep Scan Mode</p>
+                    <p className="text-xs text-slate-400">Auto-fetches up to 3 pages by clicking &apos;Load More&apos; or &apos;Next&apos; buttons. More thorough but takes longer.</p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+        )}
+
         {/* Info Alert */}
         <div className="flex items-center gap-2 mt-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
           <Info className="h-3.5 w-3.5 flex-shrink-0" />
-          <span>Auto-fetches up to 3 additional pages if &apos;Load More&apos; or &apos;Next&apos; is found. Please be patient.</span>
+          <span>
+            {deepScrape
+              ? "Deep scan enabled: Fetches up to 3 pages. Please be patient, this may take longer."
+              : "Quick scan enabled: Scans initial page only for faster results."}
+          </span>
         </div>
         {/* Batch Progress */}
         {batchMode && batchProgress.length > 0 && (
