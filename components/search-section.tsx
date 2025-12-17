@@ -40,7 +40,7 @@ export function SearchSection({
   batchProgress = [],
   batchMode = false,
   onBatchModeChange,
-  deepScrape = true,
+  deepScrape = false,
   onDeepScrapeChange
 }: SearchSectionProps) {
   const [url, setUrl] = useState("")
@@ -136,33 +136,84 @@ export function SearchSection({
       </div>
 
       <div className="relative w-full max-w-xl">
-        {/* Mode Toggle - Segmented Control */}
-        {onBatchModeChange && (
-          <div className="flex items-center justify-center mb-4">
-            <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
-              <button
-                onClick={() => !isLoading && batchMode && onBatchModeChange(false)}
-                disabled={isLoading}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${!batchMode
-                  ? 'bg-white text-[#11224E] shadow-sm'
-                  : 'bg-transparent text-slate-500 hover:text-slate-700'
-                  }`}
-              >
-                <Link className="h-3.5 w-3.5" />
-                Single URL
-              </button>
-              <button
-                onClick={() => !isLoading && !batchMode && onBatchModeChange(true)}
-                disabled={isLoading}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${batchMode
-                  ? 'bg-[#F87B1B] text-white shadow-sm'
-                  : 'bg-transparent text-slate-500 hover:text-slate-700'
-                  }`}
-              >
-                <List className="h-3.5 w-3.5" />
-                Batch Mode
-              </button>
-            </div>
+        {/* Toggle Controls - Side by Side */}
+        {(onBatchModeChange || onDeepScrapeChange) && (
+          <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
+            {/* Mode Toggle - Single URL / Batch Mode */}
+            {onBatchModeChange && (
+              <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
+                <button
+                  onClick={() => !isLoading && batchMode && onBatchModeChange(false)}
+                  disabled={isLoading}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${!batchMode
+                    ? 'bg-white text-[#11224E] shadow-sm'
+                    : 'bg-transparent text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                  <Link className="h-3.5 w-3.5" />
+                  Single URL
+                </button>
+                <button
+                  onClick={() => !isLoading && !batchMode && onBatchModeChange(true)}
+                  disabled={isLoading}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${batchMode
+                    ? 'bg-[#F87B1B] text-white shadow-sm'
+                    : 'bg-transparent text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                  <List className="h-3.5 w-3.5" />
+                  Batch Mode
+                </button>
+              </div>
+            )}
+
+            {/* Scan Mode Toggle - Quick Scan / Deep Scan */}
+            {onDeepScrapeChange && (
+              <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => !isLoading && deepScrape && onDeepScrapeChange(false)}
+                      disabled={isLoading}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${!deepScrape
+                        ? 'bg-green-500 text-white shadow-sm'
+                        : 'bg-transparent text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                      <Zap className="h-3.5 w-3.5" />
+                      Quick Scan
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" sideOffset={4} className="max-w-xs text-center">
+                    <div className="space-y-1">
+                      <p className="font-medium">Quick Scan Mode</p>
+                      <p className="text-xs text-slate-400">Scans only the initial page. Faster results, but may miss images from lazy-loaded content or pagination.</p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => !isLoading && !deepScrape && onDeepScrapeChange(true)}
+                      disabled={isLoading}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${deepScrape
+                        ? 'bg-[#F87B1B] text-white shadow-sm'
+                        : 'bg-transparent text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                      <Layers className="h-3.5 w-3.5" />
+                      Deep Scan
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" sideOffset={4} className="max-w-xs text-center">
+                    <div className="space-y-1">
+                      <p className="font-medium">Deep Scan Mode</p>
+                      <p className="text-xs text-slate-400">Auto-fetches up to 3 pages by clicking &apos;Load More&apos; or &apos;Next&apos; buttons. More thorough but takes longer.</p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
         )}
 
@@ -245,56 +296,6 @@ export function SearchSection({
             </div>
           )}
         </div>
-
-        {/* Scrape Mode Toggle */}
-        {onDeepScrapeChange && (
-          <div className="flex items-center justify-center mt-3">
-            <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => !isLoading && deepScrape && onDeepScrapeChange(false)}
-                    disabled={isLoading}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${!deepScrape
-                        ? 'bg-green-500 text-white shadow-sm'
-                        : 'bg-transparent text-slate-500 hover:text-slate-700'
-                      }`}
-                  >
-                    <Zap className="h-3.5 w-3.5" />
-                    Quick Scan
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" sideOffset={4} className="max-w-xs text-center">
-                  <div className="space-y-1">
-                    <p className="font-medium">Quick Scan Mode</p>
-                    <p className="text-xs text-slate-400">Scans only the initial page. Faster results, but may miss images from lazy-loaded content or pagination.</p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => !isLoading && !deepScrape && onDeepScrapeChange(true)}
-                    disabled={isLoading}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${deepScrape
-                        ? 'bg-[#F87B1B] text-white shadow-sm'
-                        : 'bg-transparent text-slate-500 hover:text-slate-700'
-                      }`}
-                  >
-                    <Layers className="h-3.5 w-3.5" />
-                    Deep Scan
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" sideOffset={4} className="max-w-xs text-center">
-                  <div className="space-y-1">
-                    <p className="font-medium">Deep Scan Mode</p>
-                    <p className="text-xs text-slate-400">Auto-fetches up to 3 pages by clicking &apos;Load More&apos; or &apos;Next&apos; buttons. More thorough but takes longer.</p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
-        )}
 
         {/* Info Alert */}
         <div className="flex items-center gap-2 mt-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">

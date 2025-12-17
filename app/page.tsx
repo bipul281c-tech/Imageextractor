@@ -26,7 +26,7 @@ export default function Home() {
   }>({ selectedFormats: new Set(), minWidth: 0, selectedSourceUrls: new Set() })
   const [batchMode, setBatchMode] = useState(false)
   const [batchProgress, setBatchProgress] = useState<BatchUrlState[]>([])
-  const [deepScrape, setDeepScrape] = useState(true)
+  const [deepScrape, setDeepScrape] = useState(false)
 
   // Request queue system - limits to 2 concurrent requests
   const { isQueued, queuePosition, queueRequest } = useRequestQueue()

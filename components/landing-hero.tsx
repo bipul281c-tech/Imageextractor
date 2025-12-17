@@ -50,7 +50,7 @@ export function LandingHero({
     batchProgress = [],
     batchMode = false,
     onBatchModeChange,
-    deepScrape = true,
+    deepScrape = false,
     onDeepScrapeChange
 }: LandingHeroProps) {
     const [url, setUrl] = useState(defaultUrl)
@@ -158,8 +158,8 @@ export function LandingHero({
                                 onClick={() => !isLoading && batchMode && onBatchModeChange(false)}
                                 disabled={isLoading}
                                 className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${!batchMode
-                                        ? 'bg-white text-[#11224E] shadow-sm'
-                                        : 'bg-transparent text-slate-500 hover:text-slate-700'
+                                    ? 'bg-white text-[#11224E] shadow-sm'
+                                    : 'bg-transparent text-slate-500 hover:text-slate-700'
                                     }`}
                             >
                                 <Link className="h-3.5 w-3.5" />
@@ -169,8 +169,8 @@ export function LandingHero({
                                 onClick={() => !isLoading && !batchMode && onBatchModeChange(true)}
                                 disabled={isLoading}
                                 className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${batchMode
-                                        ? 'bg-[#F87B1B] text-white shadow-sm'
-                                        : 'bg-transparent text-slate-500 hover:text-slate-700'
+                                    ? 'bg-[#F87B1B] text-white shadow-sm'
+                                    : 'bg-transparent text-slate-500 hover:text-slate-700'
                                     }`}
                             >
                                 <List className="h-3.5 w-3.5" />
@@ -270,8 +270,8 @@ export function LandingHero({
                                         onClick={() => !isLoading && deepScrape && onDeepScrapeChange(false)}
                                         disabled={isLoading}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${!deepScrape
-                                                ? 'bg-green-500 text-white shadow-sm'
-                                                : 'bg-transparent text-slate-500 hover:text-slate-700'
+                                            ? 'bg-green-500 text-white shadow-sm'
+                                            : 'bg-transparent text-slate-500 hover:text-slate-700'
                                             }`}
                                     >
                                         <Zap className="h-3.5 w-3.5" />
@@ -291,8 +291,8 @@ export function LandingHero({
                                         onClick={() => !isLoading && !deepScrape && onDeepScrapeChange(true)}
                                         disabled={isLoading}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${deepScrape
-                                                ? 'bg-[#F87B1B] text-white shadow-sm'
-                                                : 'bg-transparent text-slate-500 hover:text-slate-700'
+                                            ? 'bg-[#F87B1B] text-white shadow-sm'
+                                            : 'bg-transparent text-slate-500 hover:text-slate-700'
                                             }`}
                                     >
                                         <Layers className="h-3.5 w-3.5" />

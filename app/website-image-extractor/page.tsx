@@ -25,7 +25,7 @@ export default function WebsiteImageExtractorPage() {
   }>({ selectedFormats: new Set(), minWidth: 0, selectedSourceUrls: new Set() })
   const [batchMode, setBatchMode] = useState(false)
   const [batchProgress, setBatchProgress] = useState<BatchUrlState[]>([])
-  const [deepScrape, setDeepScrape] = useState(true)
+  const [deepScrape, setDeepScrape] = useState(false)
 
   const { isQueued, queuePosition, queueRequest } = useRequestQueue()
 
