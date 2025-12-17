@@ -26,7 +26,7 @@ export function parseUrlsFromInput(input: string, maxUrls: number = 5): string[]
 
 /**
  * Validate URLs and separate into valid/invalid lists
- * Adds https:// prefix if missing
+ * Performs basic security validation without modifying the URL
  */
 export function validateUrls(urls: string[]): {
   valid: string[];
@@ -37,18 +37,45 @@ export function validateUrls(urls: string[]): {
 
   urls.forEach(url => {
     try {
-      // Add https:// if missing protocol
-      let fullUrl = url;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        fullUrl = `https://${url}`;
+      // Block file:// URLs for security
+      if (url.match(/^file:\/\//i)) {
+        invalid.push(url);
+        return;
       }
 
-      // Validate using URL constructor
-      const parsed = new URL(fullUrl);
+      // Validate using URL constructor (allow URLs without protocol)
+      let parsed: URL;
+      try {
+        // Try parsing as-is first
+        parsed = new URL(url);
+      } catch {
+        // If parsing fails, try adding https:// for validation only
+        try {
+          parsed = new URL(`https://${url}`);
+        } catch {
+          invalid.push(url);
+          return;
+        }
+      }
 
-      // Additional validation: must have hostname
+      // Basic hostname validation
+      if (!parsed.hostname || parsed.hostname.length < 1) {
+        invalid.push(url);
+        return;
+      }
+
+      // Block localhost and internal IPs for security
+      const hostname = parsed.hostname.toLowerCase();
+      if (hostname === 'localhost' || hostname === '127.0.0.1' ||
+          hostname.startsWith('192.168.') || hostname.startsWith('10.') ||
+          hostname.startsWith('172.')) {
+        invalid.push(url);
+        return;
+      }
+
+      // Additional validation: must have hostname with domain
       if (parsed.hostname && parsed.hostname.includes('.')) {
-        valid.push(fullUrl);
+        valid.push(url); // Use original URL, not modified
       } else {
         invalid.push(url);
       }

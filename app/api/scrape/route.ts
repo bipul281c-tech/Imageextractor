@@ -17,38 +17,35 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // --- URL Normalization (Shared) ---
-        let normalizedUrl = url.trim();
-        normalizedUrl = normalizedUrl.replace(/^["']+|["']+$/g, '');
-        if (normalizedUrl.match(/^https?:\/\//i)) {
-        } else if (normalizedUrl.match(/^\/\//)) {
-            normalizedUrl = `https:${normalizedUrl}`;
-        } else if (normalizedUrl.match(/^https?:/i) && !normalizedUrl.match(/^https?:\/\//i)) {
-            normalizedUrl = normalizedUrl.replace(/^(https?:)/i, '$1//');
-        } else if (normalizedUrl.match(/^ftp:\/\//i)) {
-            return NextResponse.json<ScrapeResponse>(
-                { success: false, images: [], error: 'FTP URLs are not supported. Please use HTTP or HTTPS.' },
-                { status: 400 }
-            );
-        } else if (normalizedUrl.match(/^file:\/\//i)) {
+        // Basic validation with minimal modification
+        const trimmedUrl = url.trim();
+
+        // Block file:// URLs for security
+        if (trimmedUrl.match(/^file:\/\//i)) {
             return NextResponse.json<ScrapeResponse>(
                 { success: false, images: [], error: 'Local file URLs are not supported.' },
                 { status: 400 }
             );
-        } else {
-            normalizedUrl = `https://${normalizedUrl}`;
         }
 
+        // Validate URL format (allow URLs without protocol)
         let parsedUrl: URL;
         try {
-            parsedUrl = new URL(normalizedUrl);
+            // Try parsing as-is first
+            parsedUrl = new URL(trimmedUrl);
         } catch {
-            return NextResponse.json<ScrapeResponse>(
-                { success: false, images: [], error: 'Invalid URL format. Please enter a valid website URL.' },
-                { status: 400 }
-            );
+            // If parsing fails, try adding https:// for validation only
+            try {
+                parsedUrl = new URL(`https://${trimmedUrl}`);
+            } catch {
+                return NextResponse.json<ScrapeResponse>(
+                    { success: false, images: [], error: 'Invalid URL format. Please enter a valid website URL.' },
+                    { status: 400 }
+                );
+            }
         }
 
+        // Basic hostname validation
         if (!parsedUrl.hostname || parsedUrl.hostname.length < 1) {
             return NextResponse.json<ScrapeResponse>(
                 { success: false, images: [], error: 'URL must include a valid domain name.' },
@@ -56,6 +53,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Block localhost and internal IPs for security
         const hostname = parsedUrl.hostname.toLowerCase();
         if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.')) {
             return NextResponse.json<ScrapeResponse>(
@@ -79,8 +77,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Call Image Scraper API
-        const scraperUrl = `${IMAGE_SCRAPER_API_URL}/images?url=${encodeURIComponent(normalizedUrl)}&deep_scrape=${deepScrape}`;
+        // Call Image Scraper API with trimmed URL (passed exactly as user typed)
+        const scraperUrl = `${IMAGE_SCRAPER_API_URL}/images?url=${encodeURIComponent(trimmedUrl)}&deep_scrape=${deepScrape}`;
 
         let scraperResponse: Response;
         try {
@@ -134,7 +132,7 @@ export async function POST(request: NextRequest) {
             images,
             metadata: {
                 total_found: images.length,
-                url: normalizedUrl,
+                url: trimmedUrl,
             },
         });
 
