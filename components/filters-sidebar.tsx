@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Check, Download, X } from "lucide-react"
+import { Check, Download, X, Globe } from "lucide-react"
 import { ImageData } from "@/lib/types/scraper"
 import { calculateFilterStats } from "@/lib/filter-utils"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { getHostname } from "@/lib/parse-urls"
 
 interface FilterCheckboxProps {
   label: string
@@ -65,12 +66,14 @@ interface FiltersSidebarProps {
   onFiltersChange: (filters: {
     selectedFormats: Set<string>;
     minWidth: number;
+    selectedSourceUrls: Set<string>;
   }) => void;
 }
 
 export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps) {
   const [minWidth, setMinWidth] = useState(0)
   const [selectedFormats, setSelectedFormats] = useState<Set<string>>(new Set())
+  const [selectedSourceUrls, setSelectedSourceUrls] = useState<Set<string>>(new Set())
 
   // Calculate stats from images
   const stats = useMemo(() => calculateFilterStats(images), [images])
@@ -81,10 +84,32 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
     return entries.sort((a, b) => b[1] - a[1]) // Sort by count descending
   }, [stats.formats])
 
+  // Get unique source URLs grouped by hostname with counts
+  const sourceUrlEntries = useMemo(() => {
+    const hostnameMap = new Map<string, { count: number; urls: Set<string> }>()
+
+    images.forEach(img => {
+      if (img.sourceUrl) {
+        const hostname = getHostname(img.sourceUrl)
+        const existing = hostnameMap.get(hostname) || { count: 0, urls: new Set<string>() }
+        existing.count++
+        existing.urls.add(img.sourceUrl)
+        hostnameMap.set(hostname, existing)
+      }
+    })
+
+    // Convert to array of [hostname, count, urls[]]
+    return Array.from(hostnameMap.entries())
+      .map(([hostname, data]) => [hostname, data.count, Array.from(data.urls)] as [string, number, string[]])
+      .sort((a, b) => b[1] - a[1])
+  }, [images])
+
+  const hasMultipleSources = sourceUrlEntries.length > 1
+
   // Notify parent of filter changes
   useEffect(() => {
-    onFiltersChange({ selectedFormats, minWidth })
-  }, [selectedFormats, minWidth, onFiltersChange])
+    onFiltersChange({ selectedFormats, minWidth, selectedSourceUrls })
+  }, [selectedFormats, minWidth, selectedSourceUrls, onFiltersChange])
 
   const handleFormatToggle = (format: string, checked: boolean) => {
     const newFormats = new Set(selectedFormats)
@@ -96,14 +121,32 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
     setSelectedFormats(newFormats)
   }
 
+  const handleSourceUrlToggle = (hostname: string, urls: string[], checked: boolean) => {
+    const newSourceUrls = new Set(selectedSourceUrls)
+    if (checked) {
+      // Add all URLs from this hostname
+      urls.forEach(url => newSourceUrls.add(url))
+    } else {
+      // Remove all URLs from this hostname
+      urls.forEach(url => newSourceUrls.delete(url))
+    }
+    setSelectedSourceUrls(newSourceUrls)
+  }
+
+  // Check if a hostname is selected (all its URLs are selected)
+  const isHostnameSelected = (urls: string[]) => {
+    return urls.every(url => selectedSourceUrls.has(url))
+  }
+
   const handleReset = () => {
     setSelectedFormats(new Set())
+    setSelectedSourceUrls(new Set())
     setMinWidth(0)
   }
 
   const hasImages = images.length > 0
 
-  const activeFiltersCount = selectedFormats.size + (minWidth > 0 ? 1 : 0)
+  const activeFiltersCount = selectedFormats.size + selectedSourceUrls.size + (minWidth > 0 ? 1 : 0)
 
   return (
     <aside>
@@ -135,6 +178,26 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
                 />
               ))}
             </div>
+            {/* Source URL Filter - Mobile */}
+            {hasMultipleSources && (
+              <div className="space-y-2 pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-1.5">
+                  <Globe className="h-3 w-3 text-slate-500" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Source Website</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {sourceUrlEntries.map(([hostname, count, urls]) => (
+                    <FormatChip
+                      key={hostname}
+                      label={hostname}
+                      count={count}
+                      selected={isHostnameSelected(urls)}
+                      onToggle={() => handleSourceUrlToggle(hostname, urls, !isHostnameSelected(urls))}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
             {/* Min Width Slider - Compact */}
             <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
               <span className="text-[10px] font-medium text-slate-500 whitespace-nowrap">Min Width</span>
@@ -201,8 +264,29 @@ export function FiltersSidebar({ images, onFiltersChange }: FiltersSidebarProps)
             </div>
           </div>
 
+          {/* Filter: Source URL (only show if multiple sources exist) */}
+          {hasMultipleSources && (
+            <div className="space-y-3 border-t border-gray-50 pt-4">
+              <div className="flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-slate-500" />
+                <label className="text-xs font-medium text-slate-700">Source Website</label>
+              </div>
+              <div className="space-y-2">
+                {sourceUrlEntries.map(([hostname, count, urls]) => (
+                  <FilterCheckbox
+                    key={hostname}
+                    label={hostname}
+                    count={count}
+                    checked={isHostnameSelected(urls)}
+                    onChange={(checked) => handleSourceUrlToggle(hostname, urls, checked)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Filter: Size */}
-          <div className="space-y-3 border-t border-gray-50 pt-2">
+          <div className="space-y-3 border-t border-gray-50 pt-4">
             <div className="flex items-center justify-between">
               <label className="text-xs font-medium text-slate-700">Min Width</label>
               <span className="text-[10px] text-slate-400">{minWidth}px</span>

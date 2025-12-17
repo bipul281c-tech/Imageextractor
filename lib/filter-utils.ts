@@ -36,7 +36,8 @@ function getFileExtension(filename: string): string {
 export function filterImages(
     images: ImageData[],
     selectedFormats: Set<string>,
-    minWidth: number
+    minWidth: number,
+    selectedSourceUrls?: Set<string>
 ): ImageData[] {
     return images.filter(image => {
         // Format filter
@@ -53,6 +54,13 @@ export function filterImages(
                 if (width < minWidth) {
                     return false;
                 }
+            }
+        }
+
+        // Source URL filter (only if selectedSourceUrls is provided and not empty)
+        if (selectedSourceUrls && selectedSourceUrls.size > 0 && image.sourceUrl) {
+            if (!selectedSourceUrls.has(image.sourceUrl)) {
+                return false;
             }
         }
 

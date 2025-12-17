@@ -1,8 +1,9 @@
 "use client"
 
 import { memo } from "react"
-import { Check, Download } from "lucide-react"
+import { Check, Download, Globe } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { getHostname } from "@/lib/parse-urls"
 
 interface ImageCardProps {
   id: number
@@ -12,9 +13,10 @@ interface ImageCardProps {
   size: string
   checked: boolean
   onToggle: () => void
+  sourceUrl?: string
 }
 
-export const ImageCard = memo(function ImageCard({ src, name, dimensions, size, checked, onToggle }: ImageCardProps) {
+export const ImageCard = memo(function ImageCard({ src, name, dimensions, size, checked, onToggle, sourceUrl }: ImageCardProps) {
   return (
     <div
       className={`group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-lg border-2 bg-gray-100 will-change-transform ${checked ? "border-[#F87B1B] shadow-md ring-1 ring-[#F87B1B]/20" : "border-gray-200 hover:border-gray-300"
@@ -57,7 +59,7 @@ export const ImageCard = memo(function ImageCard({ src, name, dimensions, size, 
       {/* Bottom Info */}
       <div className="absolute bottom-0 left-0 right-0 translate-y-full border-t border-white/20 bg-white/95 p-3 backdrop-blur-sm transition-transform duration-200 ease-out group-hover:translate-y-0">
         <div className="flex items-start justify-between">
-          <div>
+          <div className="flex-1 min-w-0">
             <Tooltip>
               <TooltipTrigger asChild>
                 <p className="w-24 truncate text-xs font-medium text-[#11224E] cursor-default">{name}</p>
@@ -69,6 +71,22 @@ export const ImageCard = memo(function ImageCard({ src, name, dimensions, size, 
             <p className="text-[10px] text-slate-500">
               {dimensions} • {size}
             </p>
+            {sourceUrl && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1 mt-1 text-[9px] text-slate-400 cursor-default">
+                    <Globe className="h-2.5 w-2.5 shrink-0" />
+                    <span className="truncate">{getHostname(sourceUrl)}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={4}>
+                  <div className="text-xs">
+                    <div className="font-medium mb-1">Source URL:</div>
+                    <div className="text-slate-300 max-w-xs break-all">{sourceUrl}</div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
           <Tooltip>
             <TooltipTrigger asChild>

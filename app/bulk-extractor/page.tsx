@@ -9,8 +9,9 @@ import { Footer } from "@/components/footer"
 import { RelatedTools } from "@/components/related-tools"
 
 import { useRequestQueue } from "@/hooks/use-request-queue"
-import { ImageData, ScrapeResponse } from "@/lib/types/scraper"
+import { ImageData, ScrapeResponse, BatchUrlState } from "@/lib/types/scraper"
 import { filterImages } from "@/lib/filter-utils"
+import { deduplicateImages } from "@/lib/deduplicate-images"
 
 export default function BulkExtractorPage() {
   const [images, setImages] = useState<ImageData[]>([])
@@ -20,11 +21,14 @@ export default function BulkExtractorPage() {
   const [filters, setFilters] = useState<{
     selectedFormats: Set<string>;
     minWidth: number;
-  }>({ selectedFormats: new Set(), minWidth: 0 })
+    selectedSourceUrls: Set<string>;
+  }>({ selectedFormats: new Set(), minWidth: 0, selectedSourceUrls: new Set() })
+  const [batchMode, setBatchMode] = useState(false)
+  const [batchProgress, setBatchProgress] = useState<BatchUrlState[]>([])
 
   const { isQueued, queuePosition, queueRequest } = useRequestQueue()
 
-  const handleScan = async (url: string) => {
+  const handleSingleScan = async (url: string) => {
     setLoading(true)
     setError(undefined)
     setStatus("Scanning...")
@@ -61,18 +65,110 @@ export default function BulkExtractorPage() {
     }
   }
 
+  const handleBatchScan = async (urls: string[]) => {
+    setLoading(true)
+    setError(undefined)
+    setImages([])
+    setStatus(`Processing ${urls.length} URLs...`)
+
+    // Initialize progress tracking
+    const initialProgress: BatchUrlState[] = urls.map(url => ({
+      url,
+      status: 'pending',
+      imageCount: 0
+    }))
+    setBatchProgress(initialProgress)
+
+    const allImages: ImageData[] = []
+    let nextImageId = 1
+
+    // Send all requests in parallel (no queue)
+    const promises = urls.map(async (url, index) => {
+      try {
+        // Update to processing
+        setBatchProgress(prev => prev.map((item, i) =>
+          i === index ? { ...item, status: 'processing' } : item
+        ))
+
+        const response = await fetch("/api/scrape", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+          credentials: 'include',
+        })
+
+        const data: ScrapeResponse = await response.json()
+
+        if (!data.success) {
+          throw new Error(data.error || 'Scrape failed')
+        }
+
+        // Add sourceUrl to each image and renumber IDs
+        const imagesWithSource = data.images.map(img => ({
+          ...img,
+          id: nextImageId++,
+          sourceUrl: url
+        }))
+
+        allImages.push(...imagesWithSource)
+
+        // Update to completed
+        setBatchProgress(prev => prev.map((item, i) =>
+          i === index ? {
+            ...item,
+            status: 'completed',
+            imageCount: data.images.length
+          } : item
+        ))
+      } catch (err) {
+        // Update to failed
+        setBatchProgress(prev => prev.map((item, i) =>
+          i === index ? {
+            ...item,
+            status: 'failed',
+            error: err instanceof Error ? err.message : 'Unknown error'
+          } : item
+        ))
+      }
+    })
+
+    // Wait for all to complete
+    await Promise.all(promises)
+
+    // Deduplicate images from batch processing
+    const { uniqueImages, duplicatesRemoved } = deduplicateImages(allImages)
+
+    // Set aggregated results
+    setImages(uniqueImages)
+    const successCount = batchProgress.filter(p => p.status === 'completed').length
+    const duplicateText = duplicatesRemoved > 0 ? ` (${duplicatesRemoved} duplicate${duplicatesRemoved !== 1 ? 's' : ''} removed)` : ''
+    setStatus(`Found ${uniqueImages.length} images from ${successCount} URL${successCount !== 1 ? 's' : ''}${duplicateText}`)
+    setLoading(false)
+  }
+
+  const handleScan = async (urlOrUrls: string | string[]) => {
+    const urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls]
+
+    if (urls.length === 1) {
+      return handleSingleScan(urls[0])
+    }
+
+    return handleBatchScan(urls)
+  }
+
   const handleFiltersChange = useCallback((newFilters: {
     selectedFormats: Set<string>;
     minWidth: number;
+    selectedSourceUrls: Set<string>;
   }) => {
     setFilters(newFilters)
   }, [])
 
   const filteredImages = useMemo(() => {
-    if (filters.selectedFormats.size === 0 && filters.minWidth === 0) {
+    if (filters.selectedFormats.size === 0 && filters.minWidth === 0 && filters.selectedSourceUrls.size === 0) {
       return images
     }
-    return filterImages(images, filters.selectedFormats, filters.minWidth)
+    return filterImages(images, filters.selectedFormats, filters.minWidth, filters.selectedSourceUrls)
   }, [images, filters])
 
   return (
@@ -90,6 +186,9 @@ export default function BulkExtractorPage() {
             ctaText="Extract All"
             isQueued={isQueued}
             queuePosition={queuePosition}
+            batchProgress={batchProgress}
+            batchMode={batchMode}
+            onBatchModeChange={setBatchMode}
           />
         </section>
 

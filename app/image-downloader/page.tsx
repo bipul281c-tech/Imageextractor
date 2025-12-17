@@ -9,8 +9,9 @@ import { Footer } from "@/components/footer"
 import { RelatedTools } from "@/components/related-tools"
 
 import { useRequestQueue } from "@/hooks/use-request-queue"
-import { ImageData, ScrapeResponse } from "@/lib/types/scraper"
+import { ImageData, ScrapeResponse, BatchUrlState } from "@/lib/types/scraper"
 import { filterImages } from "@/lib/filter-utils"
+import { deduplicateImages } from "@/lib/deduplicate-images"
 
 export default function ImageDownloaderPage() {
   const [images, setImages] = useState<ImageData[]>([])
@@ -20,12 +21,15 @@ export default function ImageDownloaderPage() {
   const [filters, setFilters] = useState<{
     selectedFormats: Set<string>;
     minWidth: number;
-  }>({ selectedFormats: new Set(), minWidth: 0 })
+    selectedSourceUrls: Set<string>;
+  }>({ selectedFormats: new Set(), minWidth: 0, selectedSourceUrls: new Set() })
+  const [batchMode, setBatchMode] = useState(false)
+  const [batchProgress, setBatchProgress] = useState<BatchUrlState[]>([])
 
   // Request queue system - limits to 2 concurrent requests
   const { isQueued, queuePosition, queueRequest } = useRequestQueue()
 
-  const handleScan = async (url: string) => {
+  const handleSingleScan = async (url: string) => {
     setLoading(true)
     setError(undefined)
     setStatus("Scanning...")
@@ -63,19 +67,103 @@ export default function ImageDownloaderPage() {
     }
   }
 
+  const handleBatchScan = async (urls: string[]) => {
+    setLoading(true)
+    setError(undefined)
+    setImages([])
+    setStatus(`Processing ${urls.length} URLs...`)
+
+    const initialProgress: BatchUrlState[] = urls.map(url => ({
+      url,
+      status: 'pending',
+      imageCount: 0
+    }))
+    setBatchProgress(initialProgress)
+
+    const allImages: ImageData[] = []
+    let nextImageId = 1
+
+    const promises = urls.map(async (url, index) => {
+      try {
+        setBatchProgress(prev => prev.map((item, i) =>
+          i === index ? { ...item, status: 'processing' } : item
+        ))
+
+        const response = await fetch("/api/scrape", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+          credentials: 'include',
+        })
+
+        const data: ScrapeResponse = await response.json()
+
+        if (!data.success) {
+          throw new Error(data.error || 'Scrape failed')
+        }
+
+        const imagesWithSource = data.images.map(img => ({
+          ...img,
+          id: nextImageId++,
+          sourceUrl: url
+        }))
+
+        allImages.push(...imagesWithSource)
+
+        setBatchProgress(prev => prev.map((item, i) =>
+          i === index ? {
+            ...item,
+            status: 'completed',
+            imageCount: data.images.length
+          } : item
+        ))
+      } catch (err) {
+        setBatchProgress(prev => prev.map((item, i) =>
+          i === index ? {
+            ...item,
+            status: 'failed',
+            error: err instanceof Error ? err.message : 'Unknown error'
+          } : item
+        ))
+      }
+    })
+
+    await Promise.all(promises)
+
+    // Deduplicate images from batch processing
+    const { uniqueImages, duplicatesRemoved } = deduplicateImages(allImages)
+
+    setImages(uniqueImages)
+    const successCount = batchProgress.filter(p => p.status === 'completed').length
+    const duplicateText = duplicatesRemoved > 0 ? ` (${duplicatesRemoved} duplicate${duplicatesRemoved !== 1 ? 's' : ''} removed)` : ''
+    setStatus(`Found ${uniqueImages.length} images from ${successCount} URL${successCount !== 1 ? 's' : ''}${duplicateText}`)
+    setLoading(false)
+  }
+
+  const handleScan = async (urlOrUrls: string | string[]) => {
+    const urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls]
+
+    if (urls.length === 1) {
+      return handleSingleScan(urls[0])
+    }
+
+    return handleBatchScan(urls)
+  }
+
   const handleFiltersChange = useCallback((newFilters: {
     selectedFormats: Set<string>;
     minWidth: number;
+    selectedSourceUrls: Set<string>;
   }) => {
     setFilters(newFilters)
   }, [])
 
   // Apply filters to images
   const filteredImages = useMemo(() => {
-    if (filters.selectedFormats.size === 0 && filters.minWidth === 0) {
+    if (filters.selectedFormats.size === 0 && filters.minWidth === 0 && filters.selectedSourceUrls.size === 0) {
       return images
     }
-    return filterImages(images, filters.selectedFormats, filters.minWidth)
+    return filterImages(images, filters.selectedFormats, filters.minWidth, filters.selectedSourceUrls)
   }, [images, filters])
 
   return (
@@ -94,6 +182,9 @@ export default function ImageDownloaderPage() {
             ctaText="Download Images"
             isQueued={isQueued}
             queuePosition={queuePosition}
+            batchProgress={batchProgress}
+            batchMode={batchMode}
+            onBatchModeChange={setBatchMode}
           />
         </section>
 

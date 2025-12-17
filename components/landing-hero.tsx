@@ -1,8 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link, ArrowRight, Settings2, Loader2 } from "lucide-react"
+import { Link, ArrowRight, Settings2, Loader2, List } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { BatchUrlInput } from "@/components/batch-url-input"
+import { BatchUrlProgress } from "@/components/batch-url-progress"
+import { BatchUrlState } from "@/lib/types/scraper"
+import { parseUrlsFromInput, validateUrls } from "@/lib/parse-urls"
 
 const SCAN_MESSAGES = [
     "Throttling server",
@@ -17,7 +21,7 @@ const SCAN_DURATION = 17000 // 17 seconds
 interface LandingHeroProps {
     title: string
     subtitle: string
-    onScan: (url: string) => Promise<void>
+    onScan: (urls: string | string[]) => Promise<void>
     isLoading?: boolean
     status?: string
     isLimitReached?: boolean
@@ -25,6 +29,9 @@ interface LandingHeroProps {
     ctaText?: string
     isQueued?: boolean
     queuePosition?: number
+    batchProgress?: BatchUrlState[]
+    batchMode?: boolean
+    onBatchModeChange?: (mode: boolean) => void
 }
 
 export function LandingHero({
@@ -37,9 +44,13 @@ export function LandingHero({
     defaultUrl = "https://unsplash.com/wallpapers",
     ctaText = "Extract Images",
     isQueued = false,
-    queuePosition = 0
+    queuePosition = 0,
+    batchProgress = [],
+    batchMode = false,
+    onBatchModeChange
 }: LandingHeroProps) {
     const [url, setUrl] = useState(defaultUrl)
+    const [batchUrls, setBatchUrls] = useState("")
     const [progress, setProgress] = useState(0)
     const [messageIndex, setMessageIndex] = useState(0)
 
@@ -84,16 +95,44 @@ export function LandingHero({
     const currentMessage = SCAN_MESSAGES[messageIndex]
 
     const handleScan = async () => {
-        if (url.trim()) {
-            await onScan(url.trim())
+        if (batchMode) {
+            // Batch mode: parse and validate URLs
+            const parsed = parseUrlsFromInput(batchUrls, 5)
+            const { valid } = validateUrls(parsed)
+            if (valid.length > 0) {
+                await onScan(valid)
+            }
+        } else {
+            // Single mode
+            if (url.trim()) {
+                await onScan(url.trim())
+            }
         }
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && !isLoading) {
+        if (e.key === "Enter" && !isLoading && !batchMode) {
             handleScan()
         }
     }
+
+    const handleModeToggle = () => {
+        if (onBatchModeChange) {
+            onBatchModeChange(!batchMode)
+        }
+    }
+
+    const canSubmit = batchMode
+        ? parseUrlsFromInput(batchUrls, 5).length > 0
+        : url.trim().length > 0
+
+    const buttonText = batchMode && batchUrls.trim()
+        ? (() => {
+            const parsed = parseUrlsFromInput(batchUrls, 5)
+            const { valid } = validateUrls(parsed)
+            return valid.length > 1 ? `Extract from ${valid.length} URLs` : ctaText
+        })()
+        : ctaText
 
     return (
         <div className="mb-10 flex flex-col items-center justify-center space-y-6 text-center">
@@ -107,47 +146,120 @@ export function LandingHero({
             </div>
 
             <div className="relative w-full max-w-xl">
-                <div className="relative flex items-center overflow-hidden rounded-lg border border-gray-200 bg-white p-1 transition-all focus-within:border-slate-300 focus-within:ring-2 focus-within:ring-slate-100">
-                    <div className="flex h-full items-center pl-3 text-slate-400">
-                        <Link className="h-4 w-4" strokeWidth={1.5} />
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="https://example.com"
-                        className="h-10 w-full border-none bg-transparent px-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-0"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        disabled={isLoading || isLimitReached}
-                    />
-                    <Tooltip>
-                        <TooltipTrigger asChild>
+                {/* Mode Toggle - Segmented Control */}
+                {onBatchModeChange && (
+                    <div className="flex items-center justify-center mb-4">
+                        <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
                             <button
-                                onClick={handleScan}
-                                disabled={isLoading || !url.trim() || isLimitReached}
-                                className="flex h-9 items-center gap-2 rounded-md bg-[#F87B1B] px-4 text-xs font-medium text-white transition-colors hover:bg-[#e06c15] disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => !isLoading && batchMode && onBatchModeChange(false)}
+                                disabled={isLoading}
+                                className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    !batchMode
+                                        ? 'bg-white text-[#11224E] shadow-sm'
+                                        : 'bg-transparent text-slate-500 hover:text-slate-700'
+                                }`}
                             >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                        <span>Scanning...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span>{ctaText}</span>
-                                        <ArrowRight className="h-3.5 w-3.5" />
-                                    </>
-                                )}
+                                <Link className="h-3.5 w-3.5" />
+                                Single URL
                             </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" sideOffset={4}>
-                            {isLimitReached ? "Daily limit reached" : isLoading ? "Extracting images..." : "Extract images from URL"}
-                        </TooltipContent>
-                    </Tooltip>
+                            <button
+                                onClick={() => !isLoading && !batchMode && onBatchModeChange(true)}
+                                disabled={isLoading}
+                                className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    batchMode
+                                        ? 'bg-[#F87B1B] text-white shadow-sm'
+                                        : 'bg-transparent text-slate-500 hover:text-slate-700'
+                                }`}
+                            >
+                                <List className="h-3.5 w-3.5" />
+                                Batch Mode
+                            </button>
+                        </div>
+                    </div>
+                )}
 
+                <div className="relative">
+                    {batchMode ? (
+                        <div className="space-y-2">
+                            <BatchUrlInput
+                                value={batchUrls}
+                                onChange={setBatchUrls}
+                                disabled={isLoading || isLimitReached}
+                                maxUrls={5}
+                            />
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={handleScan}
+                                        disabled={isLoading || !canSubmit || isLimitReached}
+                                        className="w-full flex h-10 items-center justify-center gap-2 rounded-md bg-[#F87B1B] px-4 text-sm font-medium text-white transition-colors hover:bg-[#e06c15] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                <span>Processing...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>{buttonText}</span>
+                                                <ArrowRight className="h-4 w-4" />
+                                            </>
+                                        )}
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom" sideOffset={4}>
+                                    {isLimitReached ? "Daily limit reached" : isLoading ? "Extracting images..." : "Extract images from URLs"}
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    ) : (
+                        <div className="flex items-center overflow-hidden rounded-lg border border-gray-200 bg-white p-1 transition-all focus-within:border-slate-300 focus-within:ring-2 focus-within:ring-slate-100">
+                            <div className="flex h-full items-center pl-3 text-slate-400">
+                                <Link className="h-4 w-4" strokeWidth={1.5} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="https://example.com"
+                                className="h-10 w-full border-none bg-transparent px-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-0"
+                                value={url}
+                                onChange={(e) => setUrl(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                disabled={isLoading || isLimitReached}
+                            />
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={handleScan}
+                                        disabled={isLoading || !canSubmit || isLimitReached}
+                                        className="flex h-9 items-center gap-2 rounded-md bg-[#F87B1B] px-4 text-xs font-medium text-white transition-colors hover:bg-[#e06c15] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                <span>Scanning...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>{buttonText}</span>
+                                                <ArrowRight className="h-3.5 w-3.5" />
+                                            </>
+                                        )}
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom" sideOffset={4}>
+                                    {isLimitReached ? "Daily limit reached" : isLoading ? "Extracting images..." : "Extract images from URL"}
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    )}
                 </div>
+                {/* Batch Progress */}
+                {batchMode && batchProgress.length > 0 && (
+                    <BatchUrlProgress progress={batchProgress} />
+                )}
+
                 <div className="mt-3 px-1">
-                    {isLoading ? (
+                    {isLoading && !batchMode ? (
                         <div className="space-y-2">
                             {/* Progress Bar */}
                             <Tooltip>

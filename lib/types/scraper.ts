@@ -11,6 +11,7 @@ export interface ImageData {
   dimensions: string;
   size: string;
   defaultChecked: boolean;
+  sourceUrl?: string; // Track which URL this image came from (for batch processing)
 }
 
 // Response from our API route
@@ -47,4 +48,12 @@ export interface UsageStatus {
   remaining: number;
   limit: number;
   resetAt: string;
+}
+
+// Batch URL processing state
+export interface BatchUrlState {
+  url: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  imageCount: number;
+  error?: string;
 }

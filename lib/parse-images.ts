@@ -106,12 +106,25 @@ function normalizeImageUrl(url: string): string {
     try {
         const urlObj = new URL(url);
 
-        // Get base path without query string for comparison
-        // This catches cases where same image has different cache-busting params
-        const basePath = `${urlObj.origin}${urlObj.pathname}`;
+        // Get the pathname
+        let pathname = urlObj.pathname;
 
-        // Also remove common size suffixes like _150x150, -300x300
-        // But keep the core URL for deduplication
+        // Remove common size/dimension suffixes from filename
+        // Patterns like: _150x150, -300x300, _thumb, _small, _medium, _large, @2x, etc.
+        pathname = pathname.replace(/[-_]?\d+x\d+/gi, ''); // _150x150, -300x300
+        pathname = pathname.replace(/[-_](thumb|thumbnail|small|medium|large|xs|sm|md|lg|xl)/gi, ''); // _thumb, _small
+        pathname = pathname.replace(/@\d+x/gi, ''); // @2x, @3x
+        pathname = pathname.replace(/[-_](preview|scaled|resized|compressed)/gi, ''); // _preview, _scaled
+        pathname = pathname.replace(/[-_]w\d+/gi, ''); // _w300, -w500
+        pathname = pathname.replace(/[-_]h\d+/gi, ''); // _h300, -h500
+
+        // Normalize CDN paths that might have size folders
+        pathname = pathname.replace(/\/\d+x\d+\//gi, '/');
+        pathname = pathname.replace(/\/(thumb|thumbnail|small|medium|large)\//gi, '/');
+
+        // Build normalized URL without query params
+        const basePath = `${urlObj.origin}${pathname}`;
+
         return basePath.toLowerCase().replace(/\/$/, '');
     } catch {
         return url.toLowerCase().replace(/\/$/, '');
