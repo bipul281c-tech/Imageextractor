@@ -12,7 +12,7 @@ import { useRequestQueue } from "@/hooks/use-request-queue"
 import { ImageData, ScrapeResponse } from "@/lib/types/scraper"
 import { filterImages } from "@/lib/filter-utils"
 
-export default function VideoDownloaderPage() {
+export default function FacebookImageDownloaderPage() {
   const [images, setImages] = useState<ImageData[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
@@ -81,13 +81,13 @@ export default function VideoDownloaderPage() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" role="main">
         <section aria-labelledby="hero-heading">
           <LandingHero
-            title="Video Thumbnail & Image Extractor"
-            subtitle="Extract thumbnails, preview frames, and images from YouTube, Vimeo, and any video hosting site. Download video thumbnails in high quality."
+            title="Download All Photos from Facebook Pages & Profiles"
+            subtitle="Download photos from Facebook pages, profiles, and posts. Extract Facebook albums and images in bulk. No login required, completely free."
             onScan={handleScan}
             isLoading={loading}
             status={status}
-            defaultUrl="https://youtube.com/watch?v=example"
-            ctaText="Extract Thumbnails"
+            defaultUrl="https://facebook.com"
+            ctaText="Download Facebook Photos"
             isQueued={isQueued}
             queuePosition={queuePosition}
           />
@@ -115,12 +115,12 @@ export default function VideoDownloaderPage() {
 
         <section className="mt-16">
           <div className="max-w-4xl mx-auto text-center space-y-4">
-            <h2 className="text-2xl font-semibold text-[#11224E]">Download Video Thumbnails & Preview Images</h2>
+            <h2 className="text-2xl font-semibold text-[#11224E]">How to Download Facebook Photos</h2>
             <p className="text-slate-600">
-              Extract and download video thumbnails from YouTube, Vimeo, and other video hosting platforms.
-              Our video thumbnail downloader finds all preview images, thumbnails, and related graphics from video pages.
-              Perfect for content creators who need high-quality thumbnails, designers looking for preview frames,
-              or anyone who wants to save video-related images.
+              Our Facebook image downloader makes it easy to download photos from any public Facebook page, profile, or post.
+              Simply paste the Facebook URL and our tool will extract all visible images. Perfect for saving event photos,
+              downloading from business pages, or backing up your own Facebook albums. Works with public Facebook content -
+              no login required. Download images individually or in bulk as a ZIP file.
             </p>
           </div>
         </section>
@@ -130,30 +130,52 @@ export default function VideoDownloaderPage() {
             <h2 className="text-2xl font-semibold text-[#11224E] text-center mb-8">Frequently Asked Questions</h2>
             <div className="space-y-4">
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">Can I download YouTube video thumbnails?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">Can I download photos from private Facebook profiles?</h3>
                 <p className="text-slate-600 text-sm">
-                  Yes! Simply paste a YouTube video URL and our tool will extract the thumbnail image and any other images from the video page.
-                  Download high-quality thumbnails in their original resolution.
+                  Our tool works with publicly accessible Facebook content. Private profiles, private posts, and content behind login walls cannot be accessed.
+                  You can download photos from public Facebook pages, public profiles, and posts that are visible without logging in.
                 </p>
               </div>
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">Which video sites are supported?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">How do I download all photos from a Facebook album?</h3>
                 <p className="text-slate-600 text-sm">
-                  Our tool works with most major video platforms including YouTube, Vimeo, Dailymotion, and other video hosting sites.
-                  We extract all images and thumbnails from the video page.
+                  Paste the Facebook album URL into our tool and click "Download Facebook Photos". Our tool will scan the page and extract all visible images.
+                  You can then select all images and download them as a ZIP file for easy bulk downloading.
                 </p>
               </div>
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">What quality are the downloaded thumbnails?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">Is it legal to download Facebook images?</h3>
                 <p className="text-slate-600 text-sm">
-                  We extract thumbnails in their original quality as hosted by the video platform. This often includes high-resolution versions suitable for professional use.
+                  You should only download images from Facebook that you have permission to use. Respect copyright and privacy laws.
+                  This tool is intended for downloading your own photos, public domain content, or images you have rights to use.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-[#11224E] mb-2">Do I need to log into Facebook?</h3>
+                <p className="text-slate-600 text-sm">
+                  No login required! Our tool works with public Facebook content that's accessible without logging in. However, this means you can only access
+                  publicly visible photos and pages.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-[#11224E] mb-2">Can I download my own Facebook photos in bulk?</h3>
+                <p className="text-slate-600 text-sm">
+                  Yes! If your Facebook profile or albums are set to public, you can use our tool to bulk download your own photos. Alternatively,
+                  Facebook offers a native "Download Your Information" feature for downloading all your personal data.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-[#11224E] mb-2">Why can't I see all photos from a Facebook page?</h3>
+                <p className="text-slate-600 text-sm">
+                  Our tool extracts images that are visible on the current page. Some Facebook pages load more photos as you scroll.
+                  Try scrolling to load all photos first, or access specific albums directly for better results.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <RelatedTools currentSlug="video-downloader" />
+        <RelatedTools currentSlug="facebook-image-downloader" />
       </main>
       <Footer />
     </div>

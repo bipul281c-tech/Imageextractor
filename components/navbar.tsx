@@ -50,36 +50,15 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
               </div>
             </div>
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a href="#" className="text-xs font-medium text-slate-500 hover:text-slate-900">
-                Documentation
-              </a>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={4}>
-              Learn how to use ExtractPics
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a href="#" className="text-xs font-medium text-slate-500 hover:text-slate-900">
-                API Reference
-              </a>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={4}>
-              Integrate with our API
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a href="#" className="text-xs font-medium text-slate-500 hover:text-slate-900">
-                Pricing
-              </a>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={4}>
-              View plans and pricing
-            </TooltipContent>
-          </Tooltip>
+          <Link href="/about" className="text-xs font-medium text-slate-500 hover:text-slate-900">
+            About
+          </Link>
+          <Link href="/help" className="text-xs font-medium text-slate-500 hover:text-slate-900">
+            Help
+          </Link>
+          <Link href="/pricing" className="text-xs font-medium text-slate-500 hover:text-slate-900">
+            Pricing
+          </Link>
         </div>
 
         <div className="flex items-center gap-3">

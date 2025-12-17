@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { getRelatedPages } from "@/lib/pages-config"
-import { Download, Link2, Layers, ExternalLink, Film, Home, ArrowRight } from "lucide-react"
+import { Download, Link2, Layers, ExternalLink, Film, Home, ArrowRight, Globe, Link as LinkIcon, Facebook } from "lucide-react"
 
 const iconMap: Record<string, React.ElementType> = {
     Home,
@@ -11,6 +11,9 @@ const iconMap: Record<string, React.ElementType> = {
     Layers,
     ExternalLink,
     Film,
+    Globe,
+    Link: LinkIcon,
+    Facebook,
 }
 
 interface RelatedToolsProps {

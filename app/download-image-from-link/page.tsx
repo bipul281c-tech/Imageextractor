@@ -12,7 +12,7 @@ import { useRequestQueue } from "@/hooks/use-request-queue"
 import { ImageData, ScrapeResponse } from "@/lib/types/scraper"
 import { filterImages } from "@/lib/filter-utils"
 
-export default function VideoDownloaderPage() {
+export default function DownloadImageFromLinkPage() {
   const [images, setImages] = useState<ImageData[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
@@ -81,13 +81,13 @@ export default function VideoDownloaderPage() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" role="main">
         <section aria-labelledby="hero-heading">
           <LandingHero
-            title="Video Thumbnail & Image Extractor"
-            subtitle="Extract thumbnails, preview frames, and images from YouTube, Vimeo, and any video hosting site. Download video thumbnails in high quality."
+            title="Download Images from Direct Links & URLs"
+            subtitle="Download images from direct links and URLs. Paste image URLs and download in bulk. Perfect for batch downloading from spreadsheets or link lists."
             onScan={handleScan}
             isLoading={loading}
             status={status}
-            defaultUrl="https://youtube.com/watch?v=example"
-            ctaText="Extract Thumbnails"
+            defaultUrl="https://example.com/image.jpg"
+            ctaText="Download from Link"
             isQueued={isQueued}
             queuePosition={queuePosition}
           />
@@ -115,12 +115,13 @@ export default function VideoDownloaderPage() {
 
         <section className="mt-16">
           <div className="max-w-4xl mx-auto text-center space-y-4">
-            <h2 className="text-2xl font-semibold text-[#11224E]">Download Video Thumbnails & Preview Images</h2>
+            <h2 className="text-2xl font-semibold text-[#11224E]">Download Images Using Direct Links</h2>
             <p className="text-slate-600">
-              Extract and download video thumbnails from YouTube, Vimeo, and other video hosting platforms.
-              Our video thumbnail downloader finds all preview images, thumbnails, and related graphics from video pages.
-              Perfect for content creators who need high-quality thumbnails, designers looking for preview frames,
-              or anyone who wants to save video-related images.
+              Download images from direct image URLs with our batch link downloader. Perfect for downloading images from spreadsheets,
+              CSV files, or lists of image URLs. Simply paste the URL to the page containing image links, and our tool will extract
+              and display all images for downloading. Ideal for batch operations, processing URL lists, or downloading images from
+              catalogs. Preview images before downloading and filter by format or size. Download single images or bulk download
+              everything as a ZIP file. Fast, free, and works with all image formats.
             </p>
           </div>
         </section>
@@ -130,30 +131,45 @@ export default function VideoDownloaderPage() {
             <h2 className="text-2xl font-semibold text-[#11224E] text-center mb-8">Frequently Asked Questions</h2>
             <div className="space-y-4">
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">Can I download YouTube video thumbnails?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">Can I paste multiple image URLs at once?</h3>
                 <p className="text-slate-600 text-sm">
-                  Yes! Simply paste a YouTube video URL and our tool will extract the thumbnail image and any other images from the video page.
-                  Download high-quality thumbnails in their original resolution.
+                  Currently, paste the URL of a webpage that contains multiple image links, and our tool will extract all of them.
+                  For direct image URLs, paste the page URL and we'll find all images on that page.
                 </p>
               </div>
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">Which video sites are supported?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">What's the difference between downloading from a link vs webpage?</h3>
                 <p className="text-slate-600 text-sm">
-                  Our tool works with most major video platforms including YouTube, Vimeo, Dailymotion, and other video hosting sites.
-                  We extract all images and thumbnails from the video page.
+                  This tool works with both direct image links (e.g., https://example.com/image.jpg) and webpages containing multiple images.
+                  Paste any URL and we'll extract all images we find.
                 </p>
               </div>
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">What quality are the downloaded thumbnails?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">Which image formats are supported?</h3>
                 <p className="text-slate-600 text-sm">
-                  We extract thumbnails in their original quality as hosted by the video platform. This often includes high-resolution versions suitable for professional use.
+                  All common image formats are supported including JPG, PNG, GIF, WebP, SVG, BMP, and more.
+                  Our tool automatically detects the format and provides appropriate filtering options.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-[#11224E] mb-2">How fast can I download bulk images from links?</h3>
+                <p className="text-slate-600 text-sm">
+                  Our tool processes pages quickly, typically within seconds. After extraction, you can download all images at once as a ZIP file,
+                  which is much faster than downloading images one by one.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-[#11224E] mb-2">Can I download from Google Drive or Dropbox links?</h3>
+                <p className="text-slate-600 text-sm">
+                  Our tool works with publicly accessible URLs. Private files on Google Drive or Dropbox require authentication and won't be accessible.
+                  Public share links may work if the images are directly visible without logging in.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <RelatedTools currentSlug="video-downloader" />
+        <RelatedTools currentSlug="download-image-from-link" />
       </main>
       <Footer />
     </div>

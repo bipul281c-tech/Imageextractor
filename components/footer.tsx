@@ -42,12 +42,6 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-[10px] text-slate-400">© 2025 ExtractPics.com - Enterprise Grade Image Scraping</div>
           <div className="flex gap-4">
-            <a href="#" className="text-[10px] font-medium text-slate-500 hover:text-slate-900">
-              Privacy
-            </a>
-            <a href="#" className="text-[10px] font-medium text-slate-500 hover:text-slate-900">
-              Terms
-            </a>
             <Link href="/sitemap.xml" className="text-[10px] font-medium text-slate-500 hover:text-slate-900">
               Sitemap
             </Link>

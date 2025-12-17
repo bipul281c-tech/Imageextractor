@@ -12,7 +12,7 @@ import { useRequestQueue } from "@/hooks/use-request-queue"
 import { ImageData, ScrapeResponse } from "@/lib/types/scraper"
 import { filterImages } from "@/lib/filter-utils"
 
-export default function VideoDownloaderPage() {
+export default function WebsiteImageExtractorPage() {
   const [images, setImages] = useState<ImageData[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | undefined>()
@@ -81,13 +81,13 @@ export default function VideoDownloaderPage() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" role="main">
         <section aria-labelledby="hero-heading">
           <LandingHero
-            title="Video Thumbnail & Image Extractor"
-            subtitle="Extract thumbnails, preview frames, and images from YouTube, Vimeo, and any video hosting site. Download video thumbnails in high quality."
+            title="Extract All Images from Any Website Instantly"
+            subtitle="Professional image extraction tool for designers and developers. Extract all images from portfolios, galleries, and any webpage with one click."
             onScan={handleScan}
             isLoading={loading}
             status={status}
-            defaultUrl="https://youtube.com/watch?v=example"
-            ctaText="Extract Thumbnails"
+            defaultUrl="https://portfolio-example.com"
+            ctaText="Extract Website Images"
             isQueued={isQueued}
             queuePosition={queuePosition}
           />
@@ -115,12 +115,13 @@ export default function VideoDownloaderPage() {
 
         <section className="mt-16">
           <div className="max-w-4xl mx-auto text-center space-y-4">
-            <h2 className="text-2xl font-semibold text-[#11224E]">Download Video Thumbnails & Preview Images</h2>
+            <h2 className="text-2xl font-semibold text-[#11224E]">Professional Website Image Extraction</h2>
             <p className="text-slate-600">
-              Extract and download video thumbnails from YouTube, Vimeo, and other video hosting platforms.
-              Our video thumbnail downloader finds all preview images, thumbnails, and related graphics from video pages.
-              Perfect for content creators who need high-quality thumbnails, designers looking for preview frames,
-              or anyone who wants to save video-related images.
+              Extract all images from any website with our professional-grade web image extractor. Perfect for designers
+              backing up portfolio websites, developers scraping product images, or anyone needing to download all images from a webpage.
+              Our tool finds visible images, background images, and hidden graphics. Filter by format, size, or dimensions before
+              downloading. Export image URLs or download everything as a ZIP file. Ideal for competitive research, design inspiration,
+              or creating backups of image galleries.
             </p>
           </div>
         </section>
@@ -130,30 +131,51 @@ export default function VideoDownloaderPage() {
             <h2 className="text-2xl font-semibold text-[#11224E] text-center mb-8">Frequently Asked Questions</h2>
             <div className="space-y-4">
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">Can I download YouTube video thumbnails?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">Which websites can I extract images from?</h3>
                 <p className="text-slate-600 text-sm">
-                  Yes! Simply paste a YouTube video URL and our tool will extract the thumbnail image and any other images from the video page.
-                  Download high-quality thumbnails in their original resolution.
+                  Our website image extractor works with most public websites including portfolios, e-commerce sites, galleries, blogs, and more.
+                  We extract all visible images from the HTML of any webpage you paste.
                 </p>
               </div>
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">Which video sites are supported?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">Can I extract background images from CSS?</h3>
                 <p className="text-slate-600 text-sm">
-                  Our tool works with most major video platforms including YouTube, Vimeo, Dailymotion, and other video hosting sites.
-                  We extract all images and thumbnails from the video page.
+                  Yes! Our tool extracts images from various sources including CSS background images, inline styles, and image tags.
+                  We scan the entire page to find all image references.
                 </p>
               </div>
               <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-[#11224E] mb-2">What quality are the downloaded thumbnails?</h3>
+                <h3 className="font-semibold text-[#11224E] mb-2">How many images can I extract at once?</h3>
                 <p className="text-slate-600 text-sm">
-                  We extract thumbnails in their original quality as hosted by the video platform. This often includes high-resolution versions suitable for professional use.
+                  There's no limit to the number of images you can extract. Our tool will find all images on the webpage,
+                  whether it's 10 or 1000+. Use our filters to narrow down results if needed.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-[#11224E] mb-2">Does it work on password-protected websites?</h3>
+                <p className="text-slate-600 text-sm">
+                  Our tool works with publicly accessible content. Websites behind authentication, paywalls, or login screens cannot be accessed.
+                  You need to be able to view the page without logging in.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-[#11224E] mb-2">Is the original image quality preserved?</h3>
+                <p className="text-slate-600 text-sm">
+                  Yes! We extract and download images in their original quality as hosted on the website. No compression or quality loss occurs during the extraction process.
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-[#11224E] mb-2">Can I extract images from portfolio websites like Behance?</h3>
+                <p className="text-slate-600 text-sm">
+                  Yes! Our tool works great with portfolio platforms like Behance, Dribbble, ArtStation, and personal portfolio websites.
+                  Perfect for backing up your own work or gathering design inspiration (with proper attribution).
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <RelatedTools currentSlug="video-downloader" />
+        <RelatedTools currentSlug="website-image-extractor" />
       </main>
       <Footer />
     </div>

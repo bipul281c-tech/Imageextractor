@@ -70,6 +70,33 @@ export const pages: PageConfig[] = [
         icon: "Film",
         priority: 0.8,
     },
+    {
+        slug: "facebook-image-downloader",
+        title: "Download Facebook Photos & Images Free | Facebook Image Downloader",
+        shortTitle: "Facebook Downloader",
+        description: "Download photos and images from Facebook pages, profiles, and posts. Extract Facebook images in bulk with our free online tool.",
+        keywords: ["facebook image downloader", "download facebook photos", "facebook photos download", "download images from facebook", "facebook downloader", "download all facebook photos"],
+        icon: "Facebook",
+        priority: 0.9,
+    },
+    {
+        slug: "website-image-extractor",
+        title: "Website Image Extractor - Extract All Images from Any Website",
+        shortTitle: "Website Extractor",
+        description: "Professional website image extractor. Extract all images from any webpage, portfolio, or website. Bulk download for designers and developers.",
+        keywords: ["website image extractor", "extract images from website", "web image extractor", "website photo extractor", "download images from website"],
+        icon: "Globe",
+        priority: 0.9,
+    },
+    {
+        slug: "download-image-from-link",
+        title: "Download Images from Links & URLs | Batch Image URL Downloader",
+        shortTitle: "Link Downloader",
+        description: "Download images from direct links and URLs. Paste image URLs and download in bulk. Perfect for batch downloading images from link lists.",
+        keywords: ["download image from link", "download images from links", "link image download", "download image by link", "download pictures from link"],
+        icon: "Link",
+        priority: 0.85,
+    },
 ]
 
 // Get all pages except a specific one (for related links)
