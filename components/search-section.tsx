@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link, ArrowRight, Settings2, Loader2, List } from "lucide-react"
+import { Link, ArrowRight, Settings2, Loader2, List, Info } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { BatchUrlInput } from "@/components/batch-url-input"
 import { BatchUrlProgress } from "@/components/batch-url-progress"
@@ -242,6 +242,11 @@ export function SearchSection({
           )}
         </div>
 
+        {/* Info Alert */}
+        <div className="flex items-center gap-2 mt-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
+          <Info className="h-3.5 w-3.5 flex-shrink-0" />
+          <span>Auto-fetches up to 3 additional pages if &apos;Load More&apos; or &apos;Next&apos; is found. Please be patient.</span>
+        </div>
         {/* Batch Progress */}
         {batchMode && batchProgress.length > 0 && (
           <BatchUrlProgress progress={batchProgress} />
