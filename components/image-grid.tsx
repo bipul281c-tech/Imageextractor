@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback, memo } from "react"
-import { Check, Minus, ChevronDown, Package, ArrowDown, ImageOff, Loader2 } from "lucide-react"
+import { Check, Minus, ChevronDown, Package, ArrowDown, ImageOff, Loader2, Bookmark, X } from "lucide-react"
 import JSZip from "jszip"
 import { saveAs } from "file-saver"
 import { ImageCard } from "./image-card"
@@ -49,10 +49,24 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
 
   const [downloadProgress, setDownloadProgress] = useState<{ current: number; total: number } | null>(null)
 
+  // Bookmark banner state
+  const BOOKMARK_BANNER_KEY = 'bookmark-banner-dismissed'
+  const [showBookmarkBanner, setShowBookmarkBanner] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
   // Update selection when images change
   useEffect(() => {
     setSelectedImages(new Set(images.filter((img) => img.defaultChecked).map((img) => img.id)))
   }, [images])
+
+  // Initialize bookmark banner (client-side only)
+  useEffect(() => {
+    setIsMounted(true)
+    const dismissed = localStorage.getItem(BOOKMARK_BANNER_KEY)
+    if (!dismissed) {
+      setShowBookmarkBanner(true)
+    }
+  }, [])
 
   const handleSelectAll = useCallback(() => {
     setSelectedImages(prev => {
@@ -74,6 +88,39 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
       }
       return newSelected
     })
+  }, [])
+
+  // OS detection for keyboard shortcuts
+  const getBookmarkShortcut = () => {
+    if (typeof window === 'undefined') {
+      return { key: 'Ctrl+D', display: 'Ctrl+D or Cmd+D' }
+    }
+    const isMac = /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent)
+    return isMac
+      ? { key: 'Cmd+D', display: '⌘D' }
+      : { key: 'Ctrl+D', display: 'Ctrl+D' }
+  }
+
+  const handleDismissBanner = useCallback(() => {
+    localStorage.setItem(BOOKMARK_BANNER_KEY, 'true')
+    setShowBookmarkBanner(false)
+  }, [])
+
+  const handleBookmarkClick = useCallback(() => {
+    const shortcut = getBookmarkShortcut()
+
+    // Legacy IE bookmark API (graceful fallback)
+    if ('external' in window && 'AddFavorite' in (window as any).external) {
+      try {
+        (window as any).external.AddFavorite(window.location.href, document.title)
+        return
+      } catch (e) {
+        // Continue to alert fallback
+      }
+    }
+
+    // Modern browsers: Show instruction
+    alert(`Press ${shortcut.key} to bookmark this page!\n\nQuickly extract images from any website - bookmark for instant access.`)
   }, [])
 
   // Sorted images based on current sort option
@@ -204,8 +251,65 @@ export function ImageGrid({ images, loading = false, error }: ImageGridProps) {
 
   return (
     <div className="space-y-4">
+      {/* Bookmark Prompt Banner - Sticky on desktop */}
+      {isMounted && showBookmarkBanner && images.length > 0 && (
+        <div className="lg:sticky lg:top-14 lg:z-40 lg:-mx-4 lg:px-4 lg:pt-4 lg:pb-2 lg:bg-[#EEEEEE]">
+          <div className="flex items-center gap-3 rounded-lg border-2 border-green-200 bg-green-50 px-4 py-3 shadow-sm">
+          {/* Icon */}
+          <div className="flex-shrink-0">
+            <Bookmark className="h-5 w-5 text-green-600" />
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-green-900">
+              Love this tool? Bookmark it for quick access!
+            </p>
+            <p className="text-xs text-green-700 mt-0.5 hidden sm:block">
+              Extract images from any website instantly - save this page to your favorites.
+            </p>
+            {/* Draggable Bookmark Link */}
+            <div className="mt-2 hidden sm:flex items-center gap-2">
+              <span className="text-xs text-green-700">Or drag this:</span>
+              <a
+                href="https://extractpics.com/"
+                draggable="true"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-green-800 bg-white border border-green-300 rounded hover:bg-green-100 transition-colors cursor-move"
+                title="Drag this to your bookmarks bar for quick access"
+              >
+                <Bookmark className="h-3 w-3" />
+                ExtractPics
+              </a>
+              <span className="text-xs text-green-600">→ to your toolbar</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Bookmark Button */}
+            <button
+              onClick={handleBookmarkClick}
+              className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Bookmark</span>
+            </button>
+
+            {/* Dismiss Button */}
+            <button
+              onClick={handleDismissBanner}
+              className="flex items-center justify-center rounded-md p-1.5 text-green-600 transition-colors hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              aria-label="Dismiss bookmark prompt"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          </div>
+        </div>
+      )}
+
       {/* Toolbar - Sticky only on desktop */}
-      <div className="lg:sticky lg:top-14 lg:z-30 lg:-mx-4 lg:px-4 lg:pt-4 lg:pb-2 lg:bg-[#EEEEEE]">
+      <div className="lg:sticky lg:top-[10.5rem] lg:z-30 lg:-mx-4 lg:px-4 lg:pt-4 lg:pb-2 lg:bg-[#EEEEEE]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 sm:px-4 py-3 shadow-sm">
           {/* Left side - Select All & Count */}
           <div className="flex items-center gap-3 sm:gap-4">
