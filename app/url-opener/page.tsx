@@ -24,7 +24,15 @@ export default function UrlOpenerPage() {
 
   const { isQueued, queuePosition, queueRequest } = useRequestQueue()
 
-  const handleScan = async (url: string) => {
+  const handleScan = async (urls: string | string[]) => {
+    // Normalize to single URL (this page only handles one URL at a time)
+    const url = Array.isArray(urls) ? urls[0] : urls
+
+    if (!url) {
+      setError("No URL provided")
+      return
+    }
+
     setLoading(true)
     setError(undefined)
     setStatus("Scanning...")

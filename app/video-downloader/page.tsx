@@ -24,7 +24,11 @@ export default function VideoDownloaderPage() {
 
   const { isQueued, queuePosition, queueRequest } = useRequestQueue()
 
-  const handleScan = async (url: string) => {
+  const handleScan = async (urls: string | string[]) => {
+    // Normalize: if array, take the first URL; otherwise use the string directly
+    const url = Array.isArray(urls) ? urls[0] : urls
+    if (!url) return
+
     setLoading(true)
     setError(undefined)
     setStatus("Scanning...")

@@ -97,6 +97,33 @@ export const pages: PageConfig[] = [
         icon: "Link",
         priority: 0.85,
     },
+    {
+        slug: "about",
+        title: "About ExtractPics - Free Online Image Extraction Tool",
+        shortTitle: "About",
+        description: "Learn about ExtractPics, the leading free online tool for extracting and downloading images from any website. Fast, secure, and completely free.",
+        keywords: ["about extractpics", "image extraction tool", "free image downloader", "about us"],
+        icon: "Info",
+        priority: 0.8,
+    },
+    {
+        slug: "help",
+        title: "Help & FAQ - ExtractPics Image Extraction Tool",
+        shortTitle: "Help",
+        description: "Get help with ExtractPics. Find answers to frequently asked questions about extracting and downloading images from websites.",
+        keywords: ["help", "faq", "image extraction help", "troubleshooting", "how to use"],
+        icon: "HelpCircle",
+        priority: 0.75,
+    },
+    {
+        slug: "pricing",
+        title: "Pricing - ExtractPics is 100% Free Forever",
+        shortTitle: "Pricing",
+        description: "ExtractPics is completely free with unlimited image extractions. No hidden fees, no premium tiers, no subscriptions. Start extracting images now.",
+        keywords: ["pricing", "free image downloader", "free extraction tool", "image extraction pricing"],
+        icon: "DollarSign",
+        priority: 0.85,
+    },
 ]
 
 // Get all pages except a specific one (for related links)

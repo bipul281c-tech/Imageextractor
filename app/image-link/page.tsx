@@ -24,7 +24,10 @@ export default function ImageLinkPage() {
 
   const { isQueued, queuePosition, queueRequest } = useRequestQueue()
 
-  const handleScan = async (url: string) => {
+  const handleScan = async (urls: string | string[]) => {
+    // Handle both single URL and array of URLs
+    const url = Array.isArray(urls) ? urls[0] : urls
+
     setLoading(true)
     setError(undefined)
     setStatus("Scanning...")
